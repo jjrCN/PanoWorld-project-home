@@ -113,7 +113,7 @@ body {
   font-family: 'Cormorant Garamond', 'Castoro', serif;
   font-weight: 700;
   letter-spacing: 0.018em;
-  font-size: 1.13em;
+  font-size: 1.22em;
   line-height: 0.95;
   color: #35506a;
   background: linear-gradient(135deg, #243d54 0%, #456884 56%, #9b7248 100%);
@@ -675,7 +675,7 @@ body {
   }
 
   .publication-title-mark {
-    font-size: 1.08em;
+    font-size: 1.16em;
   }
 
   .content p {
