@@ -260,7 +260,8 @@ function initPanoramaTour() {
     button.title = "Jump to viewpoint " + id;
     button.setAttribute("aria-label", "Jump to viewpoint " + id);
     button.innerHTML = [
-      '<span class="pano-tour-hotspot-ring" aria-hidden="true"></span>',
+      '<span class="pano-tour-hotspot-ring pano-tour-hotspot-ring--outer" aria-hidden="true"></span>',
+      '<span class="pano-tour-hotspot-ring pano-tour-hotspot-ring--inner" aria-hidden="true"></span>',
       '<span class="pano-tour-hotspot-core" aria-hidden="true"></span>'
     ].join("");
 
@@ -367,13 +368,14 @@ function initPanoramaTour() {
     ).multiplyScalar(9.5);
     sprite.renderOrder = 20;
     sprite.frustumCulled = false;
-    const scale = clamp(1.55 - distance * 0.12, 0.82, 1.22);
+    const scale = clamp(1.64 - distance * 0.14, 0.8, 1.26);
     sprite.scale.set(scale, scale, scale);
-    const buttonScale = clamp(1.42 - distance * 0.085, 0.64, 1.28);
+    const buttonScale = clamp(1.58 - distance * 0.12, 0.62, 1.4);
     sprite.userData = {
       id: targetNode.id,
       baseScale: scale,
-      buttonScale
+      buttonScale,
+      distance
     };
     return sprite;
   }
@@ -445,6 +447,7 @@ function initPanoramaTour() {
       button.hidden = false;
       button.style.left = ((projectedPoint.x + 1) / 2) * width + "px";
       button.style.top = ((-projectedPoint.y + 1) / 2) * height + "px";
+      button.style.zIndex = String(1000 - Math.round(sprite.userData.distance * 100));
       button.style.setProperty("--pano-hotspot-scale", String(sprite.userData.buttonScale));
     });
 
