@@ -22,10 +22,11 @@
         rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260518b">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260518d">
   <link rel="icon" type="image/svg+xml" href="./static/images/favicon.svg?v=20260518a">
 
-  <script defer src="./static/js/index.js?v=20260518b"></script>
+  <script defer src="./static/js/index.js?v=20260518d"></script>
+  <script type="module" src="./static/js/pano-tour.js?v=20260518d"></script>
 </head>
 <body>
 
@@ -191,6 +192,44 @@
             history. By decoupling shell-based geometry guidance from cache-rendered visual
             memory, PanoWorld preserves high-frequency 2D synthesis quality while improving
             cross-node layout and material consistency.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section pano-tour-section" id="interactive-panorama-tour">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Interactive Whole-House Panorama Tour</h2>
+        <div class="pano-tour-card">
+          <div id="pano-tour-stage" class="pano-tour-stage">
+            <div id="pano-tour-loading" class="pano-tour-loading">
+              <span class="pano-tour-spinner" aria-hidden="true"></span>
+              <span>Loading panorama tour...</span>
+            </div>
+            <div id="pano-tour-fade" class="pano-tour-fade"></div>
+            <div class="pano-tour-hud">
+              <span id="pano-tour-current" class="pano-tour-badge">Viewpoint 0003</span>
+              <span class="pano-tour-hint">Drag to look around. Scroll to zoom. Click floating markers to jump to any viewpoint.</span>
+            </div>
+            <button id="pano-tour-reset" class="pano-tour-reset" type="button">Reset View</button>
+            <div id="pano-tour-tooltip" class="pano-tour-tooltip" hidden></div>
+          </div>
+          <div class="pano-tour-strip-wrap">
+            <div class="pano-tour-strip-label">Jump to any viewpoint</div>
+            <div id="pano-tour-strip" class="pano-tour-strip"></div>
+          </div>
+        </div>
+        <div class="content has-text-justified section-copy">
+          <p>
+            Explore the whole-house panorama results in a VR-style viewer. The module renders a
+            perspective view from each 360-degree panorama, lets you freely rotate the current
+            viewpoint with the mouse, and supports direct jumping to any captured viewpoint
+            through floating in-scene markers or the full viewpoint strip below. View transitions
+            preserve your current heading and use a soft cross-fade to avoid abrupt jumps.
           </p>
         </div>
       </div>
