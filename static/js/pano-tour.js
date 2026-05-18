@@ -25,6 +25,7 @@ const VIEWPOINTS = [
 const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
 const START_VIEWPOINT_ID = "0000";
 const START_VIEWPOINT_TARGET_ID = "0016";
+const PANORAMA_CROSSFADE_DURATION_MS = 520;
 const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
 
 function scheduleIdleTask(callback, timeout) {
@@ -628,7 +629,7 @@ function initPanoramaTour() {
 
     transition = {
       startedAt: performance.now(),
-      duration: 360,
+      duration: PANORAMA_CROSSFADE_DURATION_MS,
       from: activeSphere,
       to: standbySphere
     };
@@ -701,7 +702,7 @@ function initPanoramaTour() {
 
     if (transition) {
       const progress = clamp((now - transition.startedAt) / transition.duration, 0, 1);
-      const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      const eased = 0.5 - 0.5 * Math.cos(progress * Math.PI);
       transition.from.material.opacity = 1 - eased;
       transition.to.material.opacity = eased;
 
