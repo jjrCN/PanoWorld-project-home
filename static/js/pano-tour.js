@@ -96,6 +96,10 @@ function viewerDirectionToWorldVector(node, viewerDirection) {
   );
 }
 
+function viewerDirectionToHotspotVector(viewerDirection) {
+  return [-viewerDirection[0], viewerDirection[1], -viewerDirection[2]];
+}
+
 function viewerDirectionToAngles(viewerDirection) {
   return {
     yaw: Math.atan2(viewerDirection[2], viewerDirection[0]),
@@ -355,7 +359,12 @@ function initPanoramaTour() {
     });
 
     const sprite = new THREE.Sprite(material);
-    sprite.position.set(direction[0], direction[1], direction[2]).multiplyScalar(9.5);
+    const hotspotDirection = viewerDirectionToHotspotVector(direction);
+    sprite.position.set(
+      hotspotDirection[0],
+      hotspotDirection[1],
+      hotspotDirection[2]
+    ).multiplyScalar(9.5);
     sprite.renderOrder = 20;
     sprite.frustumCulled = false;
     const scale = clamp(1.55 - distance * 0.12, 0.82, 1.22);
