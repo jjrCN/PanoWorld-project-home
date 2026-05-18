@@ -24,9 +24,7 @@ const VIEWPOINTS = [
 
 const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
 const START_VIEWPOINT_ID = "0003";
-const HOTSPOT_FLOOR_HEIGHT = -2.4;
-const HOTSPOT_MIN_RADIUS = 5.5;
-const HOTSPOT_MAX_RADIUS = 10.2;
+const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
 
 function scheduleIdleTask(callback, timeout) {
   if ("requestIdleCallback" in window) {
@@ -126,6 +124,33 @@ function computeDefaultAngles(node) {
   return viewerDirectionToAngles(worldDirectionToViewerVector(node, delta));
 }
 
+function createHotspotTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 128;
+
+  const context = canvas.getContext("2d");
+  context.clearRect(0, 0, canvas.width, canvas.height);
+
+  context.beginPath();
+  context.arc(64, 64, 34, 0, Math.PI * 2);
+  context.fillStyle = "rgba(255, 255, 255, 0.16)";
+  context.fill();
+
+  context.beginPath();
+  context.arc(64, 64, 28, 0, Math.PI * 2);
+  context.strokeStyle = "rgba(255, 255, 255, 0.95)";
+  context.lineWidth = 6;
+  context.stroke();
+
+  context.beginPath();
+  context.arc(64, 64, 10, 0, Math.PI * 2);
+  context.fillStyle = "#ffffff";
+  context.fill();
+
+  return new THREE.CanvasTexture(canvas);
+}
+
 function initPanoramaTour() {
   const stage = document.getElementById("pano-tour-stage");
   if (!stage) {
@@ -137,6 +162,7 @@ function initPanoramaTour() {
   const currentLabel = document.getElementById("pano-tour-current");
   const resetButton = document.getElementById("pano-tour-reset");
   const fadeLayer = document.getElementById("pano-tour-fade");
+  const hotspotOverlay = document.getElementById("pano-tour-hotspots");
   const tooltip = document.getElementById("pano-tour-tooltip");
 
   let renderer;
@@ -148,10 +174,7 @@ function initPanoramaTour() {
   let activeSphere;
   let standbySphere;
   let hotspotGroup;
-  let hotspotFillGeometry;
-  let hotspotRingGeometry;
-  let hotspotOuterGeometry;
-  let hotspotHitGeometry;
+  let hotspotTexture;
   let raycaster;
   let hoverHotspot = null;
   let currentViewpointId = START_VIEWPOINT_ID;
@@ -171,7 +194,10 @@ function initPanoramaTour() {
   const textureLoader = new THREE.TextureLoader();
   const textureEntries = new Map();
   const stripButtons = new Map();
+  const hotspotButtons = new Map();
   const pointer = new THREE.Vector2();
+  const cameraDirection = new THREE.Vector3();
+  const projectedPoint = new THREE.Vector3();
 
   function showLoading(message) {
     if (message) {
@@ -222,6 +248,58 @@ function initPanoramaTour() {
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   }
 
+  function ensureHotspotButton(id) {
+    if (hotspotButtons.has(id)) {
+      return hotspotButtons.get(id);
+    }
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "pano-tour-hotspot-button";
+    button.hidden = true;
+    button.title = "Jump to viewpoint " + id;
+    button.setAttribute("aria-label", "Jump to viewpoint " + id);
+    button.innerHTML = [
+      '<span class="pano-tour-hotspot-ring" aria-hidden="true"></span>',
+      '<span class="pano-tour-hotspot-core" aria-hidden="true"></span>'
+    ].join("");
+
+    button.addEventListener("pointerdown", (event) => {
+      event.stopPropagation();
+    });
+
+    button.addEventListener("pointermove", (event) => {
+      event.stopPropagation();
+    });
+
+    button.addEventListener("pointerup", (event) => {
+      event.stopPropagation();
+    });
+
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      switchViewpoint(id, true);
+    });
+
+    button.addEventListener("mouseenter", () => {
+      stage.style.cursor = "pointer";
+      tooltip.hidden = false;
+      tooltip.textContent = "Jump to viewpoint " + id;
+      tooltip.style.left = button.style.left;
+      tooltip.style.top = button.style.top;
+    });
+
+    button.addEventListener("mouseleave", () => {
+      stage.style.cursor = isPointerDown ? "grabbing" : "grab";
+      tooltip.hidden = true;
+    });
+
+    hotspotOverlay.appendChild(button);
+    hotspotButtons.set(id, button);
+    return button;
+  }
+
   function applyCameraOrientation() {
     const direction = anglesToViewerDirection(yaw, pitch);
     camera.lookAt(direction[0], direction[1], direction[2]);
@@ -265,129 +343,48 @@ function initPanoramaTour() {
     hotspotGroup.renderOrder = 20;
     scene.add(hotspotGroup);
 
-    hotspotFillGeometry = new THREE.CircleGeometry(0.42, 48);
-    hotspotRingGeometry = new THREE.RingGeometry(0.56, 0.72, 56);
-    hotspotOuterGeometry = new THREE.RingGeometry(0.84, 1.02, 56);
-    hotspotHitGeometry = new THREE.CircleGeometry(1.16, 40);
+    hotspotTexture = createHotspotTexture();
+    hotspotTexture.colorSpace = THREE.SRGBColorSpace;
 
     raycaster = new THREE.Raycaster();
   }
 
-  function createHotspotMarker(targetNode, direction, distance, index) {
+  function createHotspotSprite(targetNode, direction, distance) {
+    const material = new THREE.SpriteMaterial({
+      map: hotspotTexture,
+      transparent: true,
+      color: new THREE.Color("#7ad3ff"),
+      depthTest: false,
+      depthWrite: false
+    });
+
+    const sprite = new THREE.Sprite(material);
     const hotspotDirection = viewerDirectionToHotspotVector(direction);
-    const flatDirection = normalizeVec([hotspotDirection[0], 0, hotspotDirection[2]]);
-    const radialDistance = clamp(4.3 + distance * 1.35, HOTSPOT_MIN_RADIUS, HOTSPOT_MAX_RADIUS);
-    const baseScale = clamp(1.02 - distance * 0.028, 0.82, 1.02);
-
-    const fillMaterial = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0.16,
-      color: new THREE.Color("#7ad3ff"),
-      side: THREE.DoubleSide,
-      depthTest: false,
-      depthWrite: false
-    });
-
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0.96,
-      color: new THREE.Color("#ffffff"),
-      side: THREE.DoubleSide,
-      depthTest: false,
-      depthWrite: false
-    });
-
-    const outerMaterial = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0.3,
-      color: new THREE.Color("#7ad3ff"),
-      side: THREE.DoubleSide,
-      depthTest: false,
-      depthWrite: false
-    });
-
-    const hitMaterial = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-      side: THREE.DoubleSide,
-      depthTest: false,
-      depthWrite: false
-    });
-
-    const group = new THREE.Group();
-    group.position.set(
-      flatDirection[0] * radialDistance,
-      HOTSPOT_FLOOR_HEIGHT,
-      flatDirection[2] * radialDistance
-    );
-    group.renderOrder = 20;
-    group.frustumCulled = false;
-    group.userData = {
+    sprite.position.set(
+      hotspotDirection[0],
+      hotspotDirection[1],
+      hotspotDirection[2]
+    ).multiplyScalar(9.5);
+    sprite.renderOrder = 20;
+    sprite.frustumCulled = false;
+    const scale = clamp(1.55 - distance * 0.12, 0.82, 1.22);
+    sprite.scale.set(scale, scale, scale);
+    sprite.userData = {
       id: targetNode.id,
-      baseScale,
-      pulseOffset: index * 0.55
+      baseScale: scale
     };
-
-    const fillMesh = new THREE.Mesh(hotspotFillGeometry, fillMaterial);
-    fillMesh.rotation.x = -Math.PI / 2;
-    fillMesh.renderOrder = 20;
-    fillMesh.userData.id = targetNode.id;
-
-    const ringMesh = new THREE.Mesh(hotspotRingGeometry, ringMaterial);
-    ringMesh.rotation.x = -Math.PI / 2;
-    ringMesh.renderOrder = 21;
-    ringMesh.userData.id = targetNode.id;
-
-    const outerMesh = new THREE.Mesh(hotspotOuterGeometry, outerMaterial);
-    outerMesh.rotation.x = -Math.PI / 2;
-    outerMesh.renderOrder = 19;
-    outerMesh.userData.id = targetNode.id;
-
-    const hitMesh = new THREE.Mesh(hotspotHitGeometry, hitMaterial);
-    hitMesh.rotation.x = -Math.PI / 2;
-    hitMesh.renderOrder = 18;
-    hitMesh.userData.id = targetNode.id;
-
-    group.userData.visuals = {
-      fillMesh,
-      ringMesh,
-      outerMesh
-    };
-    group.add(outerMesh);
-    group.add(fillMesh);
-    group.add(ringMesh);
-    group.add(hitMesh);
-    return group;
-  }
-
-  function disposeHotspotObject(object) {
-    object.traverse((child) => {
-      if (child.material) {
-        child.material.dispose();
-      }
-    });
-  }
-
-  function resolveHotspotTarget(object) {
-    let current = object;
-    while (current && current !== hotspotGroup) {
-      if (current.parent === hotspotGroup && current.userData && current.userData.id) {
-        return current;
-      }
-      current = current.parent;
-    }
-    return null;
+    return sprite;
   }
 
   function rebuildHotspots() {
     while (hotspotGroup.children.length) {
       const child = hotspotGroup.children[0];
       hotspotGroup.remove(child);
-      disposeHotspotObject(child);
+      child.material.dispose();
     }
 
     const currentNode = VIEWPOINT_MAP.get(currentViewpointId);
-    VIEWPOINTS.forEach((targetNode, index) => {
+    VIEWPOINTS.forEach((targetNode) => {
       if (targetNode.id === currentViewpointId) {
         return;
       }
@@ -395,23 +392,63 @@ function initPanoramaTour() {
       const delta = subtractVec(targetNode.position, currentNode.position);
       const direction = worldDirectionToViewerVector(currentNode, delta);
       const distance = vecLength(delta);
-      hotspotGroup.add(createHotspotMarker(targetNode, direction, distance, index));
+      hotspotGroup.add(createHotspotSprite(targetNode, direction, distance));
     });
   }
 
-  function updateHotspotHoverState(now) {
-    hotspotGroup.children.forEach((hotspot) => {
-      const visuals = hotspot.userData.visuals;
-      const isHovered = hoverHotspot === hotspot;
-      const pulse = 1 + 0.05 * Math.sin(now * 0.004 + hotspot.userData.pulseOffset);
-      const targetScale = hotspot.userData.baseScale * (isHovered ? 1.12 : pulse);
+  function updateHotspotHoverState() {
+    hotspotGroup.children.forEach((sprite) => {
+      const isHovered = hoverHotspot === sprite;
+      const targetScale = sprite.userData.baseScale * (isHovered ? 1.18 : 1);
+      sprite.scale.set(targetScale, targetScale, targetScale);
+      sprite.material.color.set(isHovered ? "#ffcf70" : "#7ad3ff");
+    });
+  }
 
-      hotspot.scale.set(targetScale, targetScale, targetScale);
-      visuals.fillMesh.material.color.set(isHovered ? "#ffd88c" : "#7ad3ff");
-      visuals.fillMesh.material.opacity = isHovered ? 0.22 : 0.16;
-      visuals.ringMesh.material.color.set(isHovered ? "#ffd88c" : "#ffffff");
-      visuals.outerMesh.material.color.set(isHovered ? "#ffd88c" : "#7ad3ff");
-      visuals.outerMesh.material.opacity = isHovered ? 0.42 : 0.3;
+  function updateHotspotButtons() {
+    const width = stage.clientWidth;
+    const height = stage.clientHeight;
+    const activeIds = new Set();
+
+    camera.getWorldDirection(cameraDirection);
+
+    hotspotGroup.children.forEach((sprite) => {
+      const id = sprite.userData.id;
+      const button = ensureHotspotButton(id);
+      const facingScore = sprite.position.clone().normalize().dot(cameraDirection);
+      projectedPoint.copy(sprite.position).project(camera);
+
+      activeIds.add(id);
+
+      const isVisible = (
+        hotspotGroup.visible &&
+        !transition &&
+        facingScore > 0.04 &&
+        projectedPoint.z > -1 &&
+        projectedPoint.z < 1 &&
+        projectedPoint.x > -1.12 &&
+        projectedPoint.x < 1.12 &&
+        projectedPoint.y > -1.12 &&
+        projectedPoint.y < 1.12
+      );
+
+      if (!isVisible) {
+        if (tooltip.textContent === "Jump to viewpoint " + id) {
+          tooltip.hidden = true;
+        }
+        button.hidden = true;
+        return;
+      }
+
+      button.hidden = false;
+      button.style.left = ((projectedPoint.x + 1) / 2) * width + "px";
+      button.style.top = ((-projectedPoint.y + 1) / 2) * height + "px";
+    });
+
+    hotspotButtons.forEach((button, id) => {
+      if (!activeIds.has(id)) {
+        button.hidden = true;
+      }
     });
   }
 
@@ -551,12 +588,9 @@ function initPanoramaTour() {
   function handleClick(event) {
     setPointerFromEvent(event);
     raycaster.setFromCamera(pointer, camera);
-    const intersections = raycaster.intersectObjects(hotspotGroup.children, true);
+    const intersections = raycaster.intersectObjects(hotspotGroup.children, false);
     if (intersections.length) {
-      const target = resolveHotspotTarget(intersections[0].object);
-      if (target) {
-        switchViewpoint(target.userData.id, true);
-      }
+      switchViewpoint(intersections[0].object.userData.id, true);
     }
   }
 
@@ -568,9 +602,8 @@ function initPanoramaTour() {
 
     setPointerFromEvent(event);
     raycaster.setFromCamera(pointer, camera);
-    const intersections = raycaster.intersectObjects(hotspotGroup.children, true);
-    const target = intersections.length ? resolveHotspotTarget(intersections[0].object) : null;
-    setTooltip(target);
+    const intersections = raycaster.intersectObjects(hotspotGroup.children, false);
+    setTooltip(intersections.length ? intersections[0].object : null);
   }
 
   function resize() {
@@ -609,7 +642,8 @@ function initPanoramaTour() {
       }
     }
 
-    updateHotspotHoverState(now);
+    updateHotspotHoverState();
+    updateHotspotButtons();
     updateTooltipPosition();
     renderer.render(scene, camera);
   }
