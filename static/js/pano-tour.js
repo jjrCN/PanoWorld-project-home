@@ -236,8 +236,8 @@ function initPanoramaTour() {
     });
   }
 
-  function markFade(active) {
-    fadeLayer.classList.toggle("is-active", Boolean(active));
+  function setFadeAmount(amount) {
+    fadeLayer.style.opacity = String(clamp(amount, 0, 1));
   }
 
   function setTooltip(sprite) {
@@ -618,24 +618,20 @@ function initPanoramaTour() {
   function startCrossFade(texture, nextNodeId, nextAngles) {
     standbySphere.material.map = texture;
     standbySphere.material.needsUpdate = true;
-    standbySphere.material.opacity = 0;
-    standbySphere.visible = true;
+    standbySphere.material.opacity = 1;
+    standbySphere.visible = false;
 
-    currentViewpointId = nextNodeId;
-    yaw = nextAngles.yaw;
-    pitch = nextAngles.pitch;
-    applyCameraOrientation();
-    updateDefaultView();
-    setCurrentLabel(currentViewpointId);
     setTooltip(null);
     hotspotGroup.visible = false;
-    markFade(true);
 
     transition = {
       startedAt: performance.now(),
       duration: 360,
       from: activeSphere,
-      to: standbySphere
+      to: standbySphere,
+      nextNodeId,
+      nextAngles,
+      swapped: false
     };
   }
 
@@ -706,23 +702,37 @@ function initPanoramaTour() {
 
     if (transition) {
       const progress = clamp((now - transition.startedAt) / transition.duration, 0, 1);
-      const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-      transition.from.material.opacity = 1 - eased;
-      transition.to.material.opacity = eased;
+      const fadeProgress = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
+      const easedFade = fadeProgress < 0.5
+        ? 2 * fadeProgress * fadeProgress
+        : 1 - Math.pow(-2 * fadeProgress + 2, 2) / 2;
+      setFadeAmount(0.78 * easedFade);
 
-      if (progress >= 1) {
-        transition.from.material.opacity = 0;
+      if (!transition.swapped && progress >= 0.5) {
+        transition.swapped = true;
         transition.from.visible = false;
-        transition.to.material.opacity = 1;
+        transition.to.visible = true;
         activeSphere = transition.to;
         standbySphere = transition.from;
+        currentViewpointId = transition.nextNodeId;
+        yaw = transition.nextAngles.yaw;
+        pitch = transition.nextAngles.pitch;
+        applyCameraOrientation();
+        updateDefaultView();
+        setCurrentLabel(currentViewpointId);
+      }
+
+      if (progress >= 1) {
+        standbySphere.visible = false;
         transition = null;
         rebuildHotspots();
         hotspotGroup.visible = true;
-        markFade(false);
+        setFadeAmount(0);
         isSwitching = false;
         pruneTextureCache();
       }
+    } else {
+      setFadeAmount(0);
     }
 
     updateHotspotHoverState();
