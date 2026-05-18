@@ -161,6 +161,94 @@ body {
   margin: 1.3rem auto 0;
 }
 
+.quantitative-section {
+  padding-top: 2.25rem;
+}
+
+.quantitative-card {
+  background: #ffffff;
+  border: 1px solid #e5e9f0;
+  border-radius: 18px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.06);
+  padding: 1.75rem 1.35rem 1.2rem;
+}
+
+.quantitative-card + .quantitative-card {
+  margin-top: 2rem;
+}
+
+.quantitative-subcard {
+  background: #fbfcfe;
+  border: 1px solid #e7ebf2;
+  border-radius: 16px;
+  padding: 1.1rem 0.85rem 0.8rem;
+}
+
+.quantitative-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.quantitative-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem 1rem;
+  margin: 0.65rem 0 1.1rem;
+  color: #475467;
+  font-size: 0.94rem;
+}
+
+.quantitative-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.quantitative-legend-swatch {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 0.3rem;
+  display: inline-block;
+  flex: none;
+}
+
+.quantitative-highlight-chip {
+  width: 1.1rem;
+  height: 0.85rem;
+  border-radius: 0.35rem;
+  display: inline-block;
+  background: rgba(39, 74, 99, 0.1);
+  border: 1px dashed rgba(39, 74, 99, 0.35);
+}
+
+.quantitative-highlight-note {
+  color: #355070;
+}
+
+.quantitative-chart {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.25rem;
+}
+
+.quantitative-chart svg {
+  display: block;
+  height: auto;
+}
+
+.quantitative-caption {
+  max-width: 940px;
+  margin: 1rem auto 0;
+  color: #546071;
+  font-size: 0.98rem;
+  line-height: 1.78;
+  text-align: justify;
+}
+
 @media screen and (max-width: 1023px) {
   .top-showcase .navbar-menu {
     background: rgba(255, 255, 255, 0.92);
@@ -176,6 +264,10 @@ body {
     min-width: 0;
     padding-left: 0.75rem;
   }
+
+  .quantitative-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -190,5 +282,18 @@ body {
 
   .teaser .hero-body {
     padding-top: 2.2rem;
+  }
+
+  .quantitative-card {
+    padding: 1.35rem 0.8rem 0.95rem;
+  }
+
+  .quantitative-subcard {
+    padding: 0.95rem 0.55rem 0.65rem;
+  }
+
+  .quantitative-caption {
+    font-size: 0.95rem;
+    line-height: 1.72;
   }
 }

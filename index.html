@@ -22,10 +22,10 @@
         rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260518a">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260518b">
   <link rel="icon" type="image/svg+xml" href="./static/images/favicon.svg?v=20260518a">
 
-  <script defer src="./static/js/index.js?v=20260518a"></script>
+  <script defer src="./static/js/index.js?v=20260518b"></script>
 </head>
 <body>
 
@@ -351,6 +351,84 @@
           <p>
             The comparison shows room-level panorama renderings for different reconstruction
             methods.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section quantitative-section" id="quantitative-comparison">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3 has-text-centered">Quantitative Comparison</h2>
+
+        <div class="quantitative-card">
+          <h3 class="title is-4 has-text-centered">Panorama Synthesis Quality</h3>
+          <div class="quantitative-legend" aria-hidden="true">
+            <span class="quantitative-legend-item">
+              <span class="quantitative-legend-swatch" style="background-color: #264653;"></span>
+              HPSv3 ↑
+            </span>
+            <span class="quantitative-legend-item">
+              <span class="quantitative-legend-swatch" style="background-color: #e76f51;"></span>
+              CLIP-I Style ↑
+            </span>
+            <span class="quantitative-legend-item">
+              <span class="quantitative-legend-swatch" style="background-color: #2a9d8f;"></span>
+              PSNR<sub>ov</sub> ↑
+            </span>
+            <span class="quantitative-legend-item quantitative-highlight-note">
+              <span class="quantitative-highlight-chip"></span>
+              PanoWorld highlighted
+            </span>
+          </div>
+          <div id="panorama-quant-chart" class="quantitative-chart"></div>
+          <p class="quantitative-caption">
+            HPSv3 measures single-node aesthetic quality, CLIP-I Style measures image-reference
+            style consistency, and cross-node consistency is evaluated by Overlap PSNR
+            (PSNR<sub>ov</sub>). Bar heights are normalized per metric for readability, while
+            exact values are shown above each bar.
+          </p>
+        </div>
+
+        <div class="quantitative-card">
+          <h3 class="title is-4 has-text-centered">Whole-House Reconstruction Quality</h3>
+          <div class="quantitative-legend" aria-hidden="true">
+            <span class="quantitative-legend-item">
+              <span class="quantitative-legend-swatch" style="background-color: #355070;"></span>
+              PSNR ↑
+            </span>
+            <span class="quantitative-legend-item">
+              <span class="quantitative-legend-swatch" style="background-color: #3a86ff;"></span>
+              SSIM ↑
+            </span>
+            <span class="quantitative-legend-item">
+              <span class="quantitative-legend-swatch" style="background-color: #c0843d;"></span>
+              LPIPS ↓
+            </span>
+            <span class="quantitative-legend-item quantitative-highlight-note">
+              <span class="quantitative-highlight-chip"></span>
+              PanoWorld highlighted
+            </span>
+          </div>
+
+          <div class="quantitative-grid">
+            <div class="quantitative-subcard">
+              <h4 class="title is-5 has-text-centered">8 Panorama Inputs</h4>
+              <div id="reconstruction-8-chart" class="quantitative-chart"></div>
+            </div>
+            <div class="quantitative-subcard">
+              <h4 class="title is-5 has-text-centered">12 Panorama Inputs</h4>
+              <div id="reconstruction-12-chart" class="quantitative-chart"></div>
+            </div>
+          </div>
+
+          <p class="quantitative-caption">
+            Metrics are computed from panorama renderings of reconstructed 3D representations.
+            LPIPS is a lower-is-better metric, and its bar heights are inverted only for visual
+            comparison.
           </p>
         </div>
       </div>
