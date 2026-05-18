@@ -178,7 +178,6 @@ function initPanoramaTour() {
   const loading = document.getElementById("pano-tour-loading");
   const currentLabel = document.getElementById("pano-tour-current");
   const resetButton = document.getElementById("pano-tour-reset");
-  const fadeLayer = document.getElementById("pano-tour-fade");
   const hotspotOverlay = document.getElementById("pano-tour-hotspots");
   const tooltip = document.getElementById("pano-tour-tooltip");
 
@@ -234,10 +233,6 @@ function initPanoramaTour() {
     stripButtons.forEach((button, buttonId) => {
       button.classList.toggle("is-active", buttonId === id);
     });
-  }
-
-  function setFadeAmount(amount) {
-    fadeLayer.style.opacity = String(clamp(amount, 0, 1));
   }
 
   function setTooltip(sprite) {
@@ -618,8 +613,15 @@ function initPanoramaTour() {
   function startCrossFade(texture, nextNodeId, nextAngles) {
     standbySphere.material.map = texture;
     standbySphere.material.needsUpdate = true;
-    standbySphere.material.opacity = 1;
-    standbySphere.visible = false;
+    standbySphere.material.opacity = 0;
+    standbySphere.visible = true;
+
+    currentViewpointId = nextNodeId;
+    yaw = nextAngles.yaw;
+    pitch = nextAngles.pitch;
+    applyCameraOrientation();
+    updateDefaultView();
+    setCurrentLabel(currentViewpointId);
 
     setTooltip(null);
     hotspotGroup.visible = false;
@@ -628,10 +630,7 @@ function initPanoramaTour() {
       startedAt: performance.now(),
       duration: 360,
       from: activeSphere,
-      to: standbySphere,
-      nextNodeId,
-      nextAngles,
-      swapped: false
+      to: standbySphere
     };
   }
 
@@ -702,37 +701,22 @@ function initPanoramaTour() {
 
     if (transition) {
       const progress = clamp((now - transition.startedAt) / transition.duration, 0, 1);
-      const fadeProgress = progress < 0.5 ? progress * 2 : (1 - progress) * 2;
-      const easedFade = fadeProgress < 0.5
-        ? 2 * fadeProgress * fadeProgress
-        : 1 - Math.pow(-2 * fadeProgress + 2, 2) / 2;
-      setFadeAmount(0.78 * easedFade);
-
-      if (!transition.swapped && progress >= 0.5) {
-        transition.swapped = true;
-        transition.from.visible = false;
-        transition.to.visible = true;
-        activeSphere = transition.to;
-        standbySphere = transition.from;
-        currentViewpointId = transition.nextNodeId;
-        yaw = transition.nextAngles.yaw;
-        pitch = transition.nextAngles.pitch;
-        applyCameraOrientation();
-        updateDefaultView();
-        setCurrentLabel(currentViewpointId);
-      }
+      const eased = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      transition.from.material.opacity = 1 - eased;
+      transition.to.material.opacity = eased;
 
       if (progress >= 1) {
+        transition.from.material.opacity = 0;
         standbySphere.visible = false;
+        transition.to.material.opacity = 1;
+        activeSphere = transition.to;
+        standbySphere = transition.from;
         transition = null;
         rebuildHotspots();
         hotspotGroup.visible = true;
-        setFadeAmount(0);
         isSwitching = false;
         pruneTextureCache();
       }
-    } else {
-      setFadeAmount(0);
     }
 
     updateHotspotHoverState();
