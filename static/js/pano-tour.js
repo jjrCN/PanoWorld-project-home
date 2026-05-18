@@ -707,8 +707,9 @@ function initPanoramaTour() {
 
       if (progress >= 1) {
         transition.from.material.opacity = 0;
-        standbySphere.visible = false;
+        transition.from.visible = false;
         transition.to.material.opacity = 1;
+        transition.to.visible = true;
         activeSphere = transition.to;
         standbySphere = transition.from;
         transition = null;
