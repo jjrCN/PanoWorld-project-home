@@ -195,6 +195,8 @@ function initPanoramaTour() {
   const textureEntries = new Map();
   const stripButtons = new Map();
   const hotspotButtons = new Map();
+  const interactiveHotspotIds = new Set();
+  const visibleHotspotIds = new Set();
   const pointer = new THREE.Vector2();
   const cameraDirection = new THREE.Vector3();
   const projectedPoint = new THREE.Vector3();
@@ -413,6 +415,12 @@ function initPanoramaTour() {
     const width = stage.clientWidth;
     const height = stage.clientHeight;
     const activeIds = new Set();
+    const visibleEntries = [];
+    const rootFontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
+    const overlapBaseRadius = rootFontSize * 1.43;
+
+    interactiveHotspotIds.clear();
+    visibleHotspotIds.clear();
 
     camera.getWorldDirection(cameraDirection);
 
@@ -441,19 +449,63 @@ function initPanoramaTour() {
           tooltip.hidden = true;
         }
         button.hidden = true;
+        button.style.pointerEvents = "none";
+        button.tabIndex = -1;
+        button.setAttribute("aria-disabled", "true");
         return;
       }
 
       button.hidden = false;
-      button.style.left = ((projectedPoint.x + 1) / 2) * width + "px";
-      button.style.top = ((-projectedPoint.y + 1) / 2) * height + "px";
+      const screenX = ((projectedPoint.x + 1) / 2) * width;
+      const screenY = ((-projectedPoint.y + 1) / 2) * height;
+      button.style.left = screenX + "px";
+      button.style.top = screenY + "px";
       button.style.zIndex = String(1000 - Math.round(sprite.userData.distance * 100));
       button.style.setProperty("--pano-hotspot-scale", String(sprite.userData.buttonScale));
+
+      visibleHotspotIds.add(id);
+      visibleEntries.push({
+        id,
+        button,
+        sprite,
+        distance: sprite.userData.distance,
+        x: screenX,
+        y: screenY,
+        radius: overlapBaseRadius * sprite.userData.buttonScale
+      });
+    });
+
+    visibleEntries.sort((a, b) => a.distance - b.distance);
+
+    const clickableEntries = [];
+    visibleEntries.forEach((entry) => {
+      const blockedByNearer = clickableEntries.some((otherEntry) => {
+        const dx = entry.x - otherEntry.x;
+        const dy = entry.y - otherEntry.y;
+        return Math.hypot(dx, dy) < entry.radius + otherEntry.radius;
+      });
+
+      entry.button.style.pointerEvents = blockedByNearer ? "none" : "auto";
+      entry.button.tabIndex = blockedByNearer ? -1 : 0;
+      entry.button.setAttribute("aria-disabled", blockedByNearer ? "true" : "false");
+
+      if (blockedByNearer) {
+        if (hoverHotspot === entry.sprite) {
+          setTooltip(null);
+        }
+        return;
+      }
+
+      interactiveHotspotIds.add(entry.id);
+      clickableEntries.push(entry);
     });
 
     hotspotButtons.forEach((button, id) => {
       if (!activeIds.has(id)) {
         button.hidden = true;
+        button.style.pointerEvents = "none";
+        button.tabIndex = -1;
+        button.setAttribute("aria-disabled", "true");
       }
     });
   }
@@ -595,8 +647,12 @@ function initPanoramaTour() {
     setPointerFromEvent(event);
     raycaster.setFromCamera(pointer, camera);
     const intersections = raycaster.intersectObjects(hotspotGroup.children, false);
-    if (intersections.length) {
-      switchViewpoint(intersections[0].object.userData.id, true);
+    const interactiveIntersection = intersections.find((intersection) => (
+      visibleHotspotIds.has(intersection.object.userData.id) &&
+      interactiveHotspotIds.has(intersection.object.userData.id)
+    ));
+    if (interactiveIntersection) {
+      switchViewpoint(interactiveIntersection.object.userData.id, true);
     }
   }
 
@@ -609,7 +665,11 @@ function initPanoramaTour() {
     setPointerFromEvent(event);
     raycaster.setFromCamera(pointer, camera);
     const intersections = raycaster.intersectObjects(hotspotGroup.children, false);
-    setTooltip(intersections.length ? intersections[0].object : null);
+    const interactiveIntersection = intersections.find((intersection) => (
+      visibleHotspotIds.has(intersection.object.userData.id) &&
+      interactiveHotspotIds.has(intersection.object.userData.id)
+    ));
+    setTooltip(interactiveIntersection ? interactiveIntersection.object : null);
   }
 
   function resize() {
