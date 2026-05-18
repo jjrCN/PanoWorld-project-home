@@ -95,6 +95,10 @@ function getTextureKey(styleId, nodeId) {
   return styleId + ":" + nodeId;
 }
 
+function formatShortViewpointId(id) {
+  return String(Number.parseInt(id, 10)).padStart(2, "0");
+}
+
 function vecLength(vector) {
   return Math.hypot(vector[0], vector[1], vector[2]);
 }
@@ -738,7 +742,7 @@ function initPanoramaTour() {
       button.style.top = marker.yPct + "%";
       button.innerHTML = [
         '<span class="pano-tour-map-marker-dot" aria-hidden="true"></span>',
-        '<span class="pano-tour-map-marker-id" aria-hidden="true">' + node.id + "</span>"
+        '<span class="pano-tour-map-marker-id" aria-hidden="true">' + formatShortViewpointId(node.id) + "</span>"
       ].join("");
 
       ["pointerdown", "pointermove", "pointerup"].forEach((eventName) => {
