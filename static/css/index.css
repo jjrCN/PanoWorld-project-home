@@ -334,7 +334,7 @@ body {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  right: 5.25rem;
+  right: min(19rem, 36vw);
   z-index: 6;
   display: flex;
   flex-wrap: wrap;
@@ -360,6 +360,12 @@ body {
   letter-spacing: 0.02em;
 }
 
+.pano-tour-badge--secondary {
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(248, 251, 255, 0.96);
+  font-weight: 600;
+}
+
 .pano-tour-hint {
   background: rgba(15, 25, 42, 0.42);
   color: rgba(248, 251, 255, 0.92);
@@ -374,9 +380,12 @@ body {
   border: 0;
   border-radius: 999px;
   padding: 0.52rem 0.88rem;
+  max-width: min(18rem, calc(100% - 2rem));
   background: rgba(255, 255, 255, 0.92);
   color: #1f2937;
   font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
   cursor: pointer;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
   transition: transform 0.16s ease, background 0.16s ease;

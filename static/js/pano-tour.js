@@ -6,26 +6,48 @@ const COMMON_ROTATION = [
   0.0, -1.0, 0.0
 ];
 
+const STYLE_FRENCH_LUXURY = "french-luxury";
+const STYLE_MODERN_MINIMALIST = "modern-minimalist";
+const DEFAULT_STYLE_ID = STYLE_FRENCH_LUXURY;
+
+const PANORAMA_STYLES = {
+  [STYLE_FRENCH_LUXURY]: {
+    id: STYLE_FRENCH_LUXURY,
+    label: "French luxury style",
+    buttonLabel: "Switch to Modern minimalist style",
+    assetDir: "./assets/panos"
+  },
+  [STYLE_MODERN_MINIMALIST]: {
+    id: STYLE_MODERN_MINIMALIST,
+    label: "Modern minimalist style",
+    buttonLabel: "Switch to French luxury style",
+    assetDir: "./assets/panos-simple"
+  }
+};
+
+const PANORAMA_STYLE_IDS = [STYLE_FRENCH_LUXURY, STYLE_MODERN_MINIMALIST];
+
 const VIEWPOINTS = [
-  { id: "0000", position: [0.7237534, -1.055, 1.35], image: "./assets/panos/0000.webp", rotation: COMMON_ROTATION },
-  { id: "0001", position: [-0.7762466073, -1.0549999475, 1.3500000238], image: "./assets/panos/0001.webp", rotation: COMMON_ROTATION },
-  { id: "0003", position: [0.7237533927, 0.4449999928, 1.3500000238], image: "./assets/panos/0003.webp", rotation: COMMON_ROTATION },
-  { id: "0007", position: [2.2237534523, 0.4449999928, 1.3500000238], image: "./assets/panos/0007.webp", rotation: COMMON_ROTATION },
-  { id: "0008", position: [-2.2762465477, -1.0549999475, 1.3500000238], image: "./assets/panos/0008.webp", rotation: COMMON_ROTATION },
-  { id: "0009", position: [0.7237533927, 1.9450000525, 1.3500000238], image: "./assets/panos/0009.webp", rotation: COMMON_ROTATION },
-  { id: "0012", position: [3.7237534523, 0.4449999928, 1.3500000238], image: "./assets/panos/0012.webp", rotation: COMMON_ROTATION },
-  { id: "0014", position: [5.2237534523, -1.0549999475, 1.3500000238], image: "./assets/panos/0014.webp", rotation: COMMON_ROTATION },
-  { id: "0015", position: [0.7237533927, 3.4449999332, 1.3500000238], image: "./assets/panos/0015.webp", rotation: COMMON_ROTATION },
-  { id: "0016", position: [5.2237534523, -2.5550000668, 1.3500000238], image: "./assets/panos/0016.webp", rotation: COMMON_ROTATION },
-  { id: "0019", position: [-3.7762465477, 1.9450000525, 1.3500000238], image: "./assets/panos/0019.webp", rotation: COMMON_ROTATION },
-  { id: "0021", position: [-5.2762465477, 0.4449999928, 1.3500000238], image: "./assets/panos/0021.webp", rotation: COMMON_ROTATION },
-  { id: "0022", position: [6.7237534523, 0.4449999928, 1.3500000238], image: "./assets/panos/0022.webp", rotation: COMMON_ROTATION }
+  { id: "0000", position: [0.7237534, -1.055, 1.35], rotation: COMMON_ROTATION },
+  { id: "0001", position: [-0.7762466073, -1.0549999475, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0003", position: [0.7237533927, 0.4449999928, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0007", position: [2.2237534523, 0.4449999928, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0008", position: [-2.2762465477, -1.0549999475, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0009", position: [0.7237533927, 1.9450000525, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0012", position: [3.7237534523, 0.4449999928, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0014", position: [5.2237534523, -1.0549999475, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0015", position: [0.7237533927, 3.4449999332, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0016", position: [5.2237534523, -2.5550000668, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0019", position: [-3.7762465477, 1.9450000525, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0021", position: [-5.2762465477, 0.4449999928, 1.3500000238], rotation: COMMON_ROTATION },
+  { id: "0022", position: [6.7237534523, 0.4449999928, 1.3500000238], rotation: COMMON_ROTATION }
 ];
 
 const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
 const START_VIEWPOINT_ID = "0000";
 const START_VIEWPOINT_TARGET_ID = "0016";
 const PANORAMA_CROSSFADE_DURATION_MS = 520;
+const MAX_TEXTURE_CACHE_SIZE = 8;
 const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
 
 function scheduleIdleTask(callback, timeout) {
@@ -39,6 +61,22 @@ function scheduleIdleTask(callback, timeout) {
 
 function clamp(value, minValue, maxValue) {
   return Math.min(maxValue, Math.max(minValue, value));
+}
+
+function getStyleConfig(styleId) {
+  return PANORAMA_STYLES[styleId] || PANORAMA_STYLES[DEFAULT_STYLE_ID];
+}
+
+function getAlternateStyleId(styleId) {
+  return styleId === STYLE_FRENCH_LUXURY ? STYLE_MODERN_MINIMALIST : STYLE_FRENCH_LUXURY;
+}
+
+function getPanoramaImagePath(styleId, nodeId) {
+  return getStyleConfig(styleId).assetDir + "/" + nodeId + ".webp";
+}
+
+function getTextureKey(styleId, nodeId) {
+  return styleId + ":" + nodeId;
 }
 
 function vecLength(vector) {
@@ -178,7 +216,8 @@ function initPanoramaTour() {
   const strip = document.getElementById("pano-tour-strip");
   const loading = document.getElementById("pano-tour-loading");
   const currentLabel = document.getElementById("pano-tour-current");
-  const resetButton = document.getElementById("pano-tour-reset");
+  const styleLabel = document.getElementById("pano-tour-style");
+  const styleToggleButton = document.getElementById("pano-tour-style-toggle");
   const hotspotOverlay = document.getElementById("pano-tour-hotspots");
   const tooltip = document.getElementById("pano-tour-tooltip");
 
@@ -195,6 +234,7 @@ function initPanoramaTour() {
   let raycaster;
   let hoverHotspot = null;
   let currentViewpointId = START_VIEWPOINT_ID;
+  let currentStyleId = DEFAULT_STYLE_ID;
   let yaw = 0;
   let pitch = 0;
   let defaultAngles = { yaw: 0, pitch: 0 };
@@ -234,6 +274,17 @@ function initPanoramaTour() {
     stripButtons.forEach((button, buttonId) => {
       button.classList.toggle("is-active", buttonId === id);
     });
+  }
+
+  function updateStyleUI() {
+    const styleConfig = getStyleConfig(currentStyleId);
+    if (styleLabel) {
+      styleLabel.textContent = styleConfig.label;
+    }
+    if (styleToggleButton) {
+      styleToggleButton.textContent = styleConfig.buttonLabel;
+      styleToggleButton.setAttribute("aria-label", styleConfig.buttonLabel);
+    }
   }
 
   function setTooltip(sprite) {
@@ -527,14 +578,9 @@ function initPanoramaTour() {
     defaultAngles = computeDefaultAngles(VIEWPOINT_MAP.get(currentViewpointId));
   }
 
-  function resetView() {
-    yaw = defaultAngles.yaw;
-    pitch = defaultAngles.pitch;
-    applyCameraOrientation();
-  }
-
-  function loadTextureForNode(nodeId) {
-    const existing = textureEntries.get(nodeId);
+  function loadTextureForNode(styleId, nodeId) {
+    const textureKey = getTextureKey(styleId, nodeId);
+    const existing = textureEntries.get(textureKey);
     if (existing && existing.texture) {
       existing.lastUsed = performance.now();
       return Promise.resolve(existing.texture);
@@ -544,7 +590,7 @@ function initPanoramaTour() {
     }
 
     const entry = existing || { texture: null, promise: null, lastUsed: performance.now() };
-    entry.promise = textureLoader.loadAsync(VIEWPOINT_MAP.get(nodeId).image).then((texture) => {
+    entry.promise = textureLoader.loadAsync(getPanoramaImagePath(styleId, nodeId)).then((texture) => {
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.minFilter = THREE.LinearFilter;
       texture.magFilter = THREE.LinearFilter;
@@ -554,37 +600,48 @@ function initPanoramaTour() {
       entry.lastUsed = performance.now();
       return texture;
     });
-    textureEntries.set(nodeId, entry);
+    textureEntries.set(textureKey, entry);
     return entry.promise;
   }
 
   function pruneTextureCache() {
-    if (textureEntries.size <= 4) {
+    if (textureEntries.size <= MAX_TEXTURE_CACHE_SIZE) {
       return;
     }
 
-    const keepIds = new Set([currentViewpointId]);
+    const keepKeys = new Set([
+      getTextureKey(currentStyleId, currentViewpointId),
+      getTextureKey(getAlternateStyleId(currentStyleId), currentViewpointId)
+    ]);
     const entries = Array.from(textureEntries.entries()).sort((a, b) => b[1].lastUsed - a[1].lastUsed);
 
-    entries.forEach(([id, entry], index) => {
-      if (keepIds.has(id) || index < 4 || !entry.texture) {
+    entries.forEach(([textureKey, entry], index) => {
+      if (keepKeys.has(textureKey) || index < MAX_TEXTURE_CACHE_SIZE || !entry.texture) {
         return;
       }
       entry.texture.dispose();
-      textureEntries.delete(id);
+      textureEntries.delete(textureKey);
     });
   }
 
   function prefetchPanoramaImages() {
     scheduleIdleTask(() => {
-      VIEWPOINTS.forEach((node, index) => {
-        window.setTimeout(() => {
-          const image = new Image();
-          image.decoding = "async";
-          image.src = node.image;
-        }, index * 180);
+      PANORAMA_STYLE_IDS.forEach((styleId, styleIndex) => {
+        VIEWPOINTS.forEach((node, nodeIndex) => {
+          window.setTimeout(() => {
+            const image = new Image();
+            image.decoding = "async";
+            image.src = getPanoramaImagePath(styleId, node.id);
+          }, styleIndex * 1400 + nodeIndex * 180);
+        });
       });
     }, 1200);
+  }
+
+  function prefetchAlternateStyleCurrentViewpoint() {
+    scheduleIdleTask(() => {
+      loadTextureForNode(getAlternateStyleId(currentStyleId), currentViewpointId).catch(() => {});
+    }, 1500);
   }
 
   function buildStrip() {
@@ -611,18 +668,20 @@ function initPanoramaTour() {
     return viewerDirectionToAngles(worldDirectionToViewerVector(nextNode, worldDirection));
   }
 
-  function startCrossFade(texture, nextNodeId, nextAngles) {
+  function startCrossFade(texture, nextNodeId, nextAngles, nextStyleId) {
     standbySphere.material.map = texture;
     standbySphere.material.needsUpdate = true;
     standbySphere.material.opacity = 0;
     standbySphere.visible = true;
 
     currentViewpointId = nextNodeId;
+    currentStyleId = nextStyleId;
     yaw = nextAngles.yaw;
     pitch = nextAngles.pitch;
     applyCameraOrientation();
     updateDefaultView();
     setCurrentLabel(currentViewpointId);
+    updateStyleUI();
 
     setTooltip(null);
     hotspotGroup.visible = false;
@@ -645,12 +704,32 @@ function initPanoramaTour() {
 
     const nextAngles = preserveOrientation ? computePreservedAngles(nextNodeId) : computeDefaultAngles(VIEWPOINT_MAP.get(nextNodeId));
     try {
-      const texture = await loadTextureForNode(nextNodeId);
+      const texture = await loadTextureForNode(currentStyleId, nextNodeId);
       hideLoading();
-      startCrossFade(texture, nextNodeId, nextAngles);
+      startCrossFade(texture, nextNodeId, nextAngles, currentStyleId);
     } catch (error) {
       console.error(error);
       showLoading("Unable to load viewpoint " + nextNodeId);
+      window.setTimeout(hideLoading, 1400);
+      isSwitching = false;
+    }
+  }
+
+  async function switchStyle(nextStyleId) {
+    if (isSwitching || nextStyleId === currentStyleId || !PANORAMA_STYLES[nextStyleId]) {
+      return;
+    }
+
+    isSwitching = true;
+    showLoading("Switching to " + getStyleConfig(nextStyleId).label + "...");
+
+    try {
+      const texture = await loadTextureForNode(nextStyleId, currentViewpointId);
+      hideLoading();
+      startCrossFade(texture, currentViewpointId, { yaw, pitch }, nextStyleId);
+    } catch (error) {
+      console.error(error);
+      showLoading("Unable to load " + getStyleConfig(nextStyleId).label);
       window.setTimeout(hideLoading, 1400);
       isSwitching = false;
     }
@@ -718,6 +797,7 @@ function initPanoramaTour() {
         hotspotGroup.visible = true;
         isSwitching = false;
         pruneTextureCache();
+        prefetchAlternateStyleCurrentViewpoint();
       }
     }
 
@@ -785,8 +865,8 @@ function initPanoramaTour() {
       camera.updateProjectionMatrix();
     }, { passive: false });
 
-    resetButton.addEventListener("click", () => {
-      resetView();
+    styleToggleButton.addEventListener("click", () => {
+      switchStyle(getAlternateStyleId(currentStyleId));
       setTooltip(null);
     });
 
@@ -809,10 +889,11 @@ function initPanoramaTour() {
     yaw = defaultAngles.yaw;
     pitch = defaultAngles.pitch;
     applyCameraOrientation();
+    updateStyleUI();
 
     showLoading("Loading panorama tour...");
     try {
-      const texture = await loadTextureForNode(START_VIEWPOINT_ID);
+      const texture = await loadTextureForNode(currentStyleId, START_VIEWPOINT_ID);
       activeSphere.material.map = texture;
       activeSphere.material.needsUpdate = true;
       activeSphere.visible = true;
@@ -820,6 +901,7 @@ function initPanoramaTour() {
       setCurrentLabel(currentViewpointId);
       hideLoading();
       prefetchPanoramaImages();
+      prefetchAlternateStyleCurrentViewpoint();
       animate(performance.now());
     } catch (error) {
       console.error(error);
