@@ -24,6 +24,7 @@ const VIEWPOINTS = [
 
 const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
 const START_VIEWPOINT_ID = "0000";
+const START_VIEWPOINT_TARGET_ID = "0016";
 const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
 
 function scheduleIdleTask(callback, timeout) {
@@ -112,11 +113,15 @@ function anglesToViewerDirection(yaw, pitch) {
   return [cp * Math.cos(yaw), Math.sin(pitch), cp * Math.sin(yaw)];
 }
 
-function wrapAngle(angle) {
-  return Math.atan2(Math.sin(angle), Math.cos(angle));
-}
-
 function computeDefaultAngles(node) {
+  if (node.id === START_VIEWPOINT_ID) {
+    const targetNode = VIEWPOINT_MAP.get(START_VIEWPOINT_TARGET_ID);
+    if (targetNode) {
+      const startDelta = subtractVec(targetNode.position, node.position);
+      return viewerDirectionToAngles(worldDirectionToViewerVector(node, startDelta));
+    }
+  }
+
   const others = VIEWPOINTS.filter((item) => item.id !== node.id);
   if (!others.length) {
     return { yaw: 0, pitch: 0 };
@@ -125,14 +130,7 @@ function computeDefaultAngles(node) {
   const centroid = others.reduce((acc, item) => addVec(acc, item.position), [0, 0, 0]);
   const worldTarget = scaleVec(centroid, 1 / others.length);
   const delta = subtractVec(worldTarget, node.position);
-  const defaultAngles = viewerDirectionToAngles(worldDirectionToViewerVector(node, delta));
-  if (node.id === START_VIEWPOINT_ID) {
-    return {
-      yaw: wrapAngle(defaultAngles.yaw + Math.PI),
-      pitch: defaultAngles.pitch
-    };
-  }
-  return defaultAngles;
+  return viewerDirectionToAngles(worldDirectionToViewerVector(node, delta));
 }
 
 function createHotspotTexture() {
