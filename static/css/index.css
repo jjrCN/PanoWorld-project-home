@@ -145,6 +145,22 @@ body {
   line-height: 1.85;
 }
 
+.feature-figure {
+  margin-top: 1.5rem;
+}
+
+.section-image {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+}
+
+.section-copy {
+  max-width: 920px;
+  margin: 1.3rem auto 0;
+}
+
 @media screen and (max-width: 1023px) {
   .top-showcase .navbar-menu {
     background: rgba(255, 255, 255, 0.92);
