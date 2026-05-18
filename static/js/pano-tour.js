@@ -44,19 +44,19 @@ const VIEWPOINTS = [
 ];
 
 const MINIMAP_MARKERS = new Map([
-  ["0000", { xPct: 53.333, yPct: 63.583 }],
-  ["0001", { xPct: 46.444, yPct: 63.583 }],
-  ["0003", { xPct: 53.222, yPct: 54.0 }],
-  ["0007", { xPct: 59.944, yPct: 54.0 }],
-  ["0008", { xPct: 39.722, yPct: 63.583 }],
-  ["0009", { xPct: 53.222, yPct: 44.917 }],
-  ["0012", { xPct: 66.611, yPct: 54.0 }],
-  ["0014", { xPct: 73.778, yPct: 63.583 }],
-  ["0015", { xPct: 53.056, yPct: 35.917 }],
-  ["0016", { xPct: 73.778, yPct: 71.333 }],
-  ["0019", { xPct: 33.611, yPct: 44.917 }],
-  ["0021", { xPct: 26.5, yPct: 54.0 }],
-  ["0022", { xPct: 79.944, yPct: 54.0 }]
+  ["0000", { xPct: 53.333, yPct: 63.583, labelClass: "label-bottom-right" }],
+  ["0001", { xPct: 46.444, yPct: 63.583, labelClass: "label-bottom" }],
+  ["0003", { xPct: 53.222, yPct: 54.0, labelClass: "label-right" }],
+  ["0007", { xPct: 59.944, yPct: 54.0, labelClass: "label-top-right" }],
+  ["0008", { xPct: 39.722, yPct: 63.583, labelClass: "label-bottom-left" }],
+  ["0009", { xPct: 53.222, yPct: 44.917, labelClass: "label-left" }],
+  ["0012", { xPct: 66.611, yPct: 54.0, labelClass: "label-right" }],
+  ["0014", { xPct: 73.778, yPct: 63.583, labelClass: "label-top-left" }],
+  ["0015", { xPct: 53.056, yPct: 35.917, labelClass: "label-top-right" }],
+  ["0016", { xPct: 73.778, yPct: 71.333, labelClass: "label-bottom-left" }],
+  ["0019", { xPct: 33.611, yPct: 44.917, labelClass: "label-top-right" }],
+  ["0021", { xPct: 26.5, yPct: 54.0, labelClass: "label-top-right" }],
+  ["0022", { xPct: 79.944, yPct: 54.0, labelClass: "label-top-left" }]
 ]);
 
 const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
@@ -733,8 +733,8 @@ function initPanoramaTour() {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "pano-tour-map-marker";
-      if (marker.xPct >= 72) {
-        button.classList.add("is-label-left");
+      if (marker.labelClass) {
+        button.classList.add(marker.labelClass);
       }
       button.title = "Jump to viewpoint " + node.id;
       button.setAttribute("aria-label", "Jump to viewpoint " + node.id + " on floorplan map");
