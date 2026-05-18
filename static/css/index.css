@@ -352,7 +352,7 @@ body {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  right: min(19rem, 36vw);
+  right: min(20rem, 38vw);
   z-index: 6;
   display: flex;
   flex-wrap: wrap;
@@ -437,6 +437,151 @@ body {
     0 0 0 3px rgba(124, 165, 207, 0.28),
     0 18px 34px rgba(21, 40, 60, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.pano-tour-map {
+  position: absolute;
+  top: 4.9rem;
+  right: 1rem;
+  z-index: 6;
+  width: min(19rem, calc(100% - 2rem));
+  padding: 0.7rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(208, 218, 230, 0.92);
+  box-shadow:
+    0 18px 36px rgba(19, 34, 51, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  user-select: none;
+}
+
+.pano-tour-map-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+}
+
+.pano-tour-map-title {
+  color: #223548;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pano-tour-map-subtitle {
+  color: #607387;
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.pano-tour-map-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid rgba(217, 225, 234, 0.94);
+  background: linear-gradient(180deg, #fbfcfe, #f4f7fb);
+}
+
+.pano-tour-map-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.pano-tour-map-markers {
+  position: absolute;
+  inset: 0;
+}
+
+.pano-tour-map-marker {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.pano-tour-map-marker-dot {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0.92rem;
+  height: 0.92rem;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  border: 2px solid #5f3910;
+  background: #ffbe59;
+  box-shadow:
+    0 0 0 0.12rem rgba(255, 190, 89, 0.22),
+    0 5px 12px rgba(71, 47, 17, 0.22);
+  transition: transform 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.pano-tour-map-marker-id {
+  position: absolute;
+  left: 0.66rem;
+  top: -0.08rem;
+  color: #1e3144;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow:
+    0 1px 2px rgba(255, 255, 255, 0.98),
+    0 0 10px rgba(255, 255, 255, 0.92);
+  transition: transform 0.16s ease, color 0.16s ease;
+}
+
+.pano-tour-map-marker.is-label-left .pano-tour-map-marker-id {
+  left: auto;
+  right: 0.66rem;
+  transform: translateX(-100%);
+}
+
+.pano-tour-map-marker:hover .pano-tour-map-marker-dot,
+.pano-tour-map-marker:focus-visible .pano-tour-map-marker-dot {
+  transform: translate(-50%, -50%) scale(1.08);
+  background: #ffcf76;
+  box-shadow:
+    0 0 0 0.18rem rgba(255, 207, 118, 0.22),
+    0 8px 14px rgba(71, 47, 17, 0.24);
+}
+
+.pano-tour-map-marker:hover .pano-tour-map-marker-id,
+.pano-tour-map-marker:focus-visible .pano-tour-map-marker-id {
+  transform: translateX(1px);
+}
+
+.pano-tour-map-marker:focus-visible {
+  outline: none;
+}
+
+.pano-tour-map-marker.is-active .pano-tour-map-marker-dot {
+  border-color: #173858;
+  background: #4f95d8;
+  box-shadow:
+    0 0 0 0.18rem rgba(79, 149, 216, 0.22),
+    0 0 0 0.42rem rgba(79, 149, 216, 0.12),
+    0 8px 16px rgba(20, 47, 75, 0.28);
+}
+
+.pano-tour-map-marker.is-active {
+  z-index: 2;
+}
+
+.pano-tour-map-marker.is-active .pano-tour-map-marker-id {
+  color: #10263a;
 }
 
 .pano-tour-tooltip {
@@ -719,9 +864,38 @@ body {
   }
 
   .pano-tour-reset {
-    top: auto;
+    top: 0.7rem;
     right: 0.7rem;
-    bottom: 0.7rem;
+    bottom: auto;
+    max-width: min(12.5rem, calc(100% - 1.4rem));
+    font-size: 0.78rem;
+    padding: 0.48rem 0.78rem;
+  }
+
+  .pano-tour-map {
+    top: 4.05rem;
+    right: 0.7rem;
+    width: min(12rem, calc(100% - 1.4rem));
+    padding: 0.5rem;
+    border-radius: 14px;
+  }
+
+  .pano-tour-map-title {
+    font-size: 0.68rem;
+  }
+
+  .pano-tour-map-subtitle {
+    font-size: 0.58rem;
+  }
+
+  .pano-tour-map-marker-dot {
+    width: 0.72rem;
+    height: 0.72rem;
+  }
+
+  .pano-tour-map-marker-id {
+    left: 0.54rem;
+    font-size: 0.46rem;
   }
 
   .pano-tour-hotspot-button {

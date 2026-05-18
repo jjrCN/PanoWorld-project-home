@@ -23,12 +23,12 @@
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
   <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260518w">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260518x">
   <link rel="icon" type="image/svg+xml" href="./static/images/favicon.svg?v=20260518a">
 
   <script defer src="./static/js/bulma-carousel.min.js"></script>
   <script defer src="./static/js/index.js?v=20260518u"></script>
-  <script type="module" src="./static/js/pano-tour.js?v=20260518t"></script>
+  <script type="module" src="./static/js/pano-tour.js?v=20260518v"></script>
 </head>
 <body>
 
@@ -219,6 +219,22 @@
               <span id="pano-tour-style" class="pano-tour-badge pano-tour-badge--secondary">French luxury style</span>
             </div>
             <button id="pano-tour-style-toggle" class="pano-tour-reset" type="button">Switch to Modern minimalist style</button>
+            <div id="pano-tour-map" class="pano-tour-map" aria-label="Top-down floorplan map">
+              <div class="pano-tour-map-header">
+                <span class="pano-tour-map-title">Floorplan Map</span>
+                <span class="pano-tour-map-subtitle">Click a marker to jump</span>
+              </div>
+              <div class="pano-tour-map-viewport">
+                <img
+                  src="./assets/images/pano-tour-map.webp"
+                  alt="Top-down floorplan map for panorama viewpoints."
+                  class="pano-tour-map-image"
+                  width="900"
+                  height="600"
+                  decoding="async">
+                <div id="pano-tour-map-markers" class="pano-tour-map-markers"></div>
+              </div>
+            </div>
             <div id="pano-tour-tooltip" class="pano-tour-tooltip" hidden></div>
           </div>
           <div class="pano-tour-strip-wrap">

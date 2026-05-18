@@ -43,6 +43,22 @@ const VIEWPOINTS = [
   { id: "0022", position: [6.7237534523, 0.4449999928, 1.3500000238], rotation: COMMON_ROTATION }
 ];
 
+const MINIMAP_MARKERS = new Map([
+  ["0000", { xPct: 53.333, yPct: 63.583 }],
+  ["0001", { xPct: 46.444, yPct: 63.583 }],
+  ["0003", { xPct: 53.222, yPct: 54.0 }],
+  ["0007", { xPct: 59.944, yPct: 54.0 }],
+  ["0008", { xPct: 39.722, yPct: 63.583 }],
+  ["0009", { xPct: 53.222, yPct: 44.917 }],
+  ["0012", { xPct: 66.611, yPct: 54.0 }],
+  ["0014", { xPct: 73.778, yPct: 63.583 }],
+  ["0015", { xPct: 53.056, yPct: 35.917 }],
+  ["0016", { xPct: 73.778, yPct: 71.333 }],
+  ["0019", { xPct: 33.611, yPct: 44.917 }],
+  ["0021", { xPct: 26.5, yPct: 54.0 }],
+  ["0022", { xPct: 79.944, yPct: 54.0 }]
+]);
+
 const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
 const START_VIEWPOINT_ID = "0000";
 const START_VIEWPOINT_TARGET_ID = "0016";
@@ -218,6 +234,8 @@ function initPanoramaTour() {
   const currentLabel = document.getElementById("pano-tour-current");
   const styleLabel = document.getElementById("pano-tour-style");
   const styleToggleButton = document.getElementById("pano-tour-style-toggle");
+  const minimap = document.getElementById("pano-tour-map");
+  const minimapMarkers = document.getElementById("pano-tour-map-markers");
   const hotspotOverlay = document.getElementById("pano-tour-hotspots");
   const tooltip = document.getElementById("pano-tour-tooltip");
 
@@ -251,6 +269,7 @@ function initPanoramaTour() {
   const textureLoader = new THREE.TextureLoader();
   const textureEntries = new Map();
   const stripButtons = new Map();
+  const minimapButtons = new Map();
   const hotspotButtons = new Map();
   const interactiveHotspotIds = new Set();
   const visibleHotspotIds = new Set();
@@ -272,6 +291,9 @@ function initPanoramaTour() {
   function setCurrentLabel(id) {
     currentLabel.textContent = "Viewpoint " + id;
     stripButtons.forEach((button, buttonId) => {
+      button.classList.toggle("is-active", buttonId === id);
+    });
+    minimapButtons.forEach((button, buttonId) => {
       button.classList.toggle("is-active", buttonId === id);
     });
   }
@@ -303,6 +325,18 @@ function initPanoramaTour() {
       event.stopPropagation();
       switchStyle(getAlternateStyleId(currentStyleId));
       setTooltip(null);
+    });
+  }
+
+  function bindMinimapControl() {
+    if (!minimap) {
+      return;
+    }
+
+    ["pointerdown", "pointermove", "pointerup", "click", "wheel"].forEach((eventName) => {
+      minimap.addEventListener(eventName, (event) => {
+        event.stopPropagation();
+      });
     });
   }
 
@@ -680,6 +714,59 @@ function initPanoramaTour() {
     strip.appendChild(fragment);
   }
 
+  function buildMinimap() {
+    if (!minimapMarkers) {
+      return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    VIEWPOINTS.forEach((node) => {
+      const marker = MINIMAP_MARKERS.get(node.id);
+      if (!marker) {
+        return;
+      }
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "pano-tour-map-marker";
+      if (marker.xPct >= 72) {
+        button.classList.add("is-label-left");
+      }
+      button.title = "Jump to viewpoint " + node.id;
+      button.setAttribute("aria-label", "Jump to viewpoint " + node.id + " on floorplan map");
+      button.style.left = marker.xPct + "%";
+      button.style.top = marker.yPct + "%";
+      button.innerHTML = [
+        '<span class="pano-tour-map-marker-dot" aria-hidden="true"></span>',
+        '<span class="pano-tour-map-marker-id" aria-hidden="true">' + node.id + "</span>"
+      ].join("");
+
+      ["pointerdown", "pointermove", "pointerup"].forEach((eventName) => {
+        button.addEventListener(eventName, (event) => {
+          event.stopPropagation();
+        });
+      });
+
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!initialized) {
+          boot().then(() => {
+            switchViewpoint(node.id, true);
+          });
+          return;
+        }
+        switchViewpoint(node.id, true);
+      });
+
+      minimapButtons.set(node.id, button);
+      fragment.appendChild(button);
+    });
+
+    minimapMarkers.innerHTML = "";
+    minimapMarkers.appendChild(fragment);
+  }
+
   function computePreservedAngles(nextNodeId) {
     const currentNode = VIEWPOINT_MAP.get(currentViewpointId);
     const nextNode = VIEWPOINT_MAP.get(nextNodeId);
@@ -923,6 +1010,11 @@ function initPanoramaTour() {
       showLoading("Unable to initialize the panorama tour.");
     }
   }
+
+  buildMinimap();
+  bindMinimapControl();
+  updateStyleUI();
+  setCurrentLabel(currentViewpointId);
 
   if (!("IntersectionObserver" in window)) {
     boot();
