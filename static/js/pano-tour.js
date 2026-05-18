@@ -112,6 +112,10 @@ function anglesToViewerDirection(yaw, pitch) {
   return [cp * Math.cos(yaw), Math.sin(pitch), cp * Math.sin(yaw)];
 }
 
+function wrapAngle(angle) {
+  return Math.atan2(Math.sin(angle), Math.cos(angle));
+}
+
 function computeDefaultAngles(node) {
   const others = VIEWPOINTS.filter((item) => item.id !== node.id);
   if (!others.length) {
@@ -121,7 +125,14 @@ function computeDefaultAngles(node) {
   const centroid = others.reduce((acc, item) => addVec(acc, item.position), [0, 0, 0]);
   const worldTarget = scaleVec(centroid, 1 / others.length);
   const delta = subtractVec(worldTarget, node.position);
-  return viewerDirectionToAngles(worldDirectionToViewerVector(node, delta));
+  const defaultAngles = viewerDirectionToAngles(worldDirectionToViewerVector(node, delta));
+  if (node.id === START_VIEWPOINT_ID) {
+    return {
+      yaw: wrapAngle(defaultAngles.yaw + Math.PI),
+      pitch: defaultAngles.pitch
+    };
+  }
+  return defaultAngles;
 }
 
 function createHotspotTexture() {
