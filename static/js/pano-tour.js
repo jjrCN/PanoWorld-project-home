@@ -369,9 +369,11 @@ function initPanoramaTour() {
     sprite.frustumCulled = false;
     const scale = clamp(1.55 - distance * 0.12, 0.82, 1.22);
     sprite.scale.set(scale, scale, scale);
+    const buttonScale = clamp(1.42 - distance * 0.085, 0.64, 1.28);
     sprite.userData = {
       id: targetNode.id,
-      baseScale: scale
+      baseScale: scale,
+      buttonScale
     };
     return sprite;
   }
@@ -443,6 +445,7 @@ function initPanoramaTour() {
       button.hidden = false;
       button.style.left = ((projectedPoint.x + 1) / 2) * width + "px";
       button.style.top = ((-projectedPoint.y + 1) / 2) * height + "px";
+      button.style.setProperty("--pano-hotspot-scale", String(sprite.userData.buttonScale));
     });
 
     hotspotButtons.forEach((button, id) => {

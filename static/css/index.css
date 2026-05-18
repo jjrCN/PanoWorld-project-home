@@ -250,12 +250,14 @@ body {
   position: absolute;
   width: 3.3rem;
   height: 3.3rem;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(var(--pano-hotspot-scale, 1));
+  transform-origin: center center;
   border: 0;
   background: transparent;
   padding: 0;
   pointer-events: auto;
   cursor: pointer;
+  transition: transform 0.16s ease;
 }
 
 .pano-tour-hotspot-button[hidden] {
@@ -305,6 +307,11 @@ body {
 
 .pano-tour-hotspot-button:focus-visible {
   outline: none;
+}
+
+.pano-tour-hotspot-button:hover,
+.pano-tour-hotspot-button:focus-visible {
+  transform: translate(-50%, -50%) scale(calc(var(--pano-hotspot-scale, 1) * 1.08));
 }
 
 .pano-tour-hud {
