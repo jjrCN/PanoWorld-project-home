@@ -46,16 +46,16 @@ const VIEWPOINTS = [
 const MINIMAP_MARKERS = new Map([
   ["0000", { xPct: 53.333, yPct: 63.583, labelClass: "label-bottom-right" }],
   ["0001", { xPct: 46.444, yPct: 63.583, labelClass: "label-bottom" }],
-  ["0003", { xPct: 53.222, yPct: 54.0, labelClass: "label-right" }],
-  ["0007", { xPct: 59.944, yPct: 54.0, labelClass: "label-top-right" }],
+  ["0003", { xPct: 53.222, yPct: 54.0, labelClass: "label-left" }],
+  ["0007", { xPct: 59.944, yPct: 54.0, labelClass: "label-top" }],
   ["0008", { xPct: 39.722, yPct: 63.583, labelClass: "label-bottom-left" }],
   ["0009", { xPct: 53.222, yPct: 44.917, labelClass: "label-left" }],
   ["0012", { xPct: 66.611, yPct: 54.0, labelClass: "label-right" }],
-  ["0014", { xPct: 73.778, yPct: 63.583, labelClass: "label-top-left" }],
+  ["0014", { xPct: 73.778, yPct: 63.583, labelClass: "label-bottom-right" }],
   ["0015", { xPct: 53.056, yPct: 35.917, labelClass: "label-top-right" }],
   ["0016", { xPct: 73.778, yPct: 71.333, labelClass: "label-bottom-left" }],
   ["0019", { xPct: 33.611, yPct: 44.917, labelClass: "label-top-right" }],
-  ["0021", { xPct: 26.5, yPct: 54.0, labelClass: "label-top-right" }],
+  ["0021", { xPct: 26.5, yPct: 54.0, labelClass: "label-bottom-left" }],
   ["0022", { xPct: 79.944, yPct: 54.0, labelClass: "label-top-left" }]
 ]);
 
