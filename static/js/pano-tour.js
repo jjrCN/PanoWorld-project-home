@@ -233,7 +233,6 @@ function initPanoramaTour() {
     return;
   }
 
-  const strip = document.getElementById("pano-tour-strip");
   const loading = document.getElementById("pano-tour-loading");
   const currentLabel = document.getElementById("pano-tour-current");
   const styleLabel = document.getElementById("pano-tour-style");
@@ -272,7 +271,6 @@ function initPanoramaTour() {
   let animationFrameId = null;
   const textureLoader = new THREE.TextureLoader();
   const textureEntries = new Map();
-  const stripButtons = new Map();
   const minimapButtons = new Map();
   const hotspotButtons = new Map();
   const interactiveHotspotIds = new Set();
@@ -294,9 +292,6 @@ function initPanoramaTour() {
 
   function setCurrentLabel(id) {
     currentLabel.textContent = "Viewpoint " + id;
-    stripButtons.forEach((button, buttonId) => {
-      button.classList.toggle("is-active", buttonId === id);
-    });
     minimapButtons.forEach((button, buttonId) => {
       button.classList.toggle("is-active", buttonId === id);
     });
@@ -701,23 +696,6 @@ function initPanoramaTour() {
     }, 1500);
   }
 
-  function buildStrip() {
-    const fragment = document.createDocumentFragment();
-    VIEWPOINTS.forEach((node) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "pano-tour-point-button";
-      button.textContent = node.id;
-      button.addEventListener("click", () => {
-        switchViewpoint(node.id, true);
-      });
-      stripButtons.set(node.id, button);
-      fragment.appendChild(button);
-    });
-    strip.innerHTML = "";
-    strip.appendChild(fragment);
-  }
-
   function buildMinimap() {
     if (!minimapMarkers) {
       return;
@@ -985,7 +963,6 @@ function initPanoramaTour() {
     initialized = true;
 
     createScene();
-    buildStrip();
     bindStyleToggleControl();
     bindEvents();
     resize();
