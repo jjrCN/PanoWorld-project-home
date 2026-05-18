@@ -23,7 +23,7 @@ const VIEWPOINTS = [
 ];
 
 const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
-const START_VIEWPOINT_ID = "0003";
+const START_VIEWPOINT_ID = "0000";
 const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
 
 function scheduleIdleTask(callback, timeout) {
