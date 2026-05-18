@@ -417,6 +417,13 @@ body {
   background: linear-gradient(180deg, #fbfcff, #f7f9fc);
 }
 
+.pano-tour-guidance {
+  color: #5a6a7b;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  margin-bottom: 0.85rem;
+}
+
 .pano-tour-strip-label {
   color: #516071;
   font-size: 0.93rem;
@@ -600,6 +607,12 @@ body {
   .pano-tour-hint {
     max-width: 100%;
     line-height: 1.35;
+  }
+
+  .pano-tour-guidance {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    margin-bottom: 0.75rem;
   }
 
   .pano-tour-reset {

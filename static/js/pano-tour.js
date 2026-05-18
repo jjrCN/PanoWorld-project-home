@@ -287,6 +287,25 @@ function initPanoramaTour() {
     }
   }
 
+  function bindStyleToggleControl() {
+    if (!styleToggleButton) {
+      return;
+    }
+
+    ["pointerdown", "pointermove", "pointerup"].forEach((eventName) => {
+      styleToggleButton.addEventListener(eventName, (event) => {
+        event.stopPropagation();
+      });
+    });
+
+    styleToggleButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      switchStyle(getAlternateStyleId(currentStyleId));
+      setTooltip(null);
+    });
+  }
+
   function setTooltip(sprite) {
     hoverHotspot = sprite || null;
     tooltip.hidden = !sprite;
@@ -865,11 +884,6 @@ function initPanoramaTour() {
       camera.updateProjectionMatrix();
     }, { passive: false });
 
-    styleToggleButton.addEventListener("click", () => {
-      switchStyle(getAlternateStyleId(currentStyleId));
-      setTooltip(null);
-    });
-
     window.addEventListener("resize", resize);
   }
 
@@ -881,6 +895,7 @@ function initPanoramaTour() {
 
     createScene();
     buildStrip();
+    bindStyleToggleControl();
     bindEvents();
     resize();
 
