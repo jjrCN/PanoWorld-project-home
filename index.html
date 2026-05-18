@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="PanoWorld is a generative spatial world model for consistent whole-house panorama synthesis from floorplans and style references.">
+  <meta name="keywords" content="PanoWorld, panorama synthesis, spatial world model, 3D Gaussian Splatting, whole-house VR tour, floorplan generation">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PanoWorld: A Generative Spatial World Model for Consistent Whole-House Panorama Synthesis</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload"
+        as="image"
+        href="./assets/images/img1-1200.webp"
+        imagesrcset="./assets/images/img1-1200.webp 1200w,
+                     ./assets/images/img1-1800.webp 1800w"
+        imagesizes="(max-width: 1023px) calc(100vw - 3rem), 960px"
+        type="image/webp"
+        fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260518a">
+  <link rel="icon" type="image/svg+xml" href="./static/images/favicon.svg?v=20260518a">
+
+  <script defer src="./static/js/index.js?v=20260518a"></script>
+</head>
+<body>
+
+<div class="top-showcase">
+  <nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div class="navbar-menu">
+      <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+        <a class="navbar-item" href="https://jjrcn.github.io/PanoWorld-project-home/" aria-label="Home">
+          <span class="icon" aria-hidden="true">
+            <svg class="inline-icon" viewBox="0 0 24 24" focusable="false">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+            </svg>
+          </span>
+        </a>
+
+        <div class="navbar-item has-dropdown is-hoverable">
+          <a class="navbar-link" role="button" tabindex="0" aria-haspopup="true">
+            More Research
+          </a>
+          <div class="navbar-dropdown">
+            <a class="navbar-item" href="https://jjrcn.github.io/yogo-project-home/">
+              YOGO
+            </a>
+            <a class="navbar-item" href="https://github.com/Traffic-X/MonoLSS">
+              MonoLSS
+            </a>
+            <a class="navbar-item" href="https://github.com/Traffic-X/MonoUNI">
+              MonoUNI
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">
+              PanoWorld: A Generative Spatial World Model for Consistent Whole-House Panorama Synthesis
+            </h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">Jinrang Jia,</span>
+              <span class="author-block">Zhenjia Li,</span>
+              <span class="author-block">Yijiang Hu,</span>
+              <span class="author-block">Yifeng Shi<sup>†</sup></span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">Ke Holdings Inc.</span>
+            </div>
+            <div class="is-size-6 publication-notes">
+              <span class="author-block">†Corresponding author</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <span class="link-block">
+                  <a href="https://jjrcn.github.io/PanoWorld-project-home/"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon" aria-hidden="true">
+                      <svg class="inline-icon" viewBox="0 0 24 24" focusable="false">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9zM8 13h2.3a2.2 2.2 0 0 1 0 4H9v2H8zm1 1.2v1.6h1.2a.8.8 0 0 0 0-1.6zm5 4.8h-2v-6h2a3 3 0 0 1 0 6m-.2-4.8H13v3.6h.8a1.8 1.8 0 0 0 0-3.6M17 14.2V16h2v1.2h-2V19h-1v-6h3.4v1.2z"></path>
+                      </svg>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://jjrcn.github.io/PanoWorld-project-home/"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon" aria-hidden="true">
+                      <svg class="inline-icon" viewBox="0 0 24 24" focusable="false">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9zM7 18.5l2.3-3.1L7.1 12h1.7l1.4 2.2 1.5-2.2h1.7l-2.3 3.2 2.4 3.3h-1.7l-1.6-2.3-1.6 2.3zm8.2 0h-1.4V12h1.4z"></path>
+                      </svg>
+                    </span>
+                    <span>arXiv</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://jjrcn.github.io/PanoWorld-project-home/"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon" aria-hidden="true">
+                      <svg class="inline-icon" viewBox="0 0 24 24" focusable="false">
+                        <path d="M12 .8a11.5 11.5 0 0 0-3.6 22.4c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.6 1.2 3.3.9.1-.7.4-1.2.7-1.5-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a10.8 10.8 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.9 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.3.8 1 .8 2v3c0 .3.2.7.8.5A11.5 11.5 0 0 0 12 .8z"></path>
+                      </svg>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+                <span class="link-block">
+                  <a href="https://jjrcn.github.io/PanoWorld-project-home/"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon" aria-hidden="true">
+                      <svg class="inline-icon" viewBox="0 0 24 24" focusable="false">
+                        <path d="M4 5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm2 0v11h11V5zm10 14v1a2 2 0 0 1-2 2H5a3 3 0 0 1-3-3v-9a2 2 0 0 1 2-2v11a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1zM8 8.5A1.5 1.5 0 1 1 9.5 10 1.5 1.5 0 0 1 8 8.5m-1 6 2.3-2.8a1 1 0 0 1 1.5 0l1.2 1.4.8-.9a1 1 0 0 1 1.5 0l1.7 2.3z"></path>
+                      </svg>
+                    </span>
+                    <span>Data</span>
+                  </a>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <picture>
+        <source
+          type="image/webp"
+          srcset="./assets/images/img1-1200.webp 1200w,
+                  ./assets/images/img1-1800.webp 1800w"
+          sizes="(max-width: 1023px) calc(100vw - 3rem), 960px">
+        <img src="./assets/images/img1-1800.webp"
+             alt="Main figure for PanoWorld."
+             class="teaser-image"
+             width="1800"
+             height="896"
+             decoding="async"
+             loading="eager"
+             fetchpriority="high">
+      </picture>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Generating a consistent whole-house VR tour from a floorplan and style reference
+            requires both photorealistic panoramas and cross-view spatial coherence. Pure 2D
+            generators produce appealing single panoramas but re-imagine geometry and materials
+            when the viewpoint changes, whereas monolithic 3D generation becomes expensive and
+            loses fine texture at multi-room scale. We introduce <strong>PanoWorld</strong>, a
+            generative spatial world model that treats whole-house synthesis as autoregressive
+            generation of node-based 360-degree panoramas, matching the discrete navigation used
+            by real VR tour products. PanoWorld uses a floorplan-derived 3D shell as a global
+            geometric proxy and a dynamic 3D Gaussian Splatting cache as renderable spatial
+            memory. A feed-forward panoramic LRM designed for metric-scale multi-room 360-degree
+            inputs lifts generated panoramas into local 3DGS updates, while Room-aware Group
+            Attention suppresses cross-room feature interference. A topology-aware progressive
+            caching strategy fuses these local updates without repeatedly reconstructing the full
+            history. By decoupling shell-based geometry guidance from cache-rendered visual
+            memory, PanoWorld preserves high-frequency 2D synthesis quality while improving
+            cross-node layout and material consistency.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
