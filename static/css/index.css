@@ -7,30 +7,31 @@ body {
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.5), transparent 24%),
-    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.28), transparent 20%),
-    linear-gradient(128deg,
-      #edf3f6 0%,
-      #edf3f6 49.6%,
-      #f7f1e9 49.6%,
-      #f7f1e9 100%);
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.78), transparent 25%),
+    radial-gradient(circle at 84% 12%, rgba(212, 222, 231, 0.42), transparent 22%),
+    radial-gradient(circle at 52% 92%, rgba(203, 190, 176, 0.16), transparent 30%),
+    linear-gradient(180deg, #f6f8f8 0%, #eef3f5 46%, #f6f3ee 100%);
 }
 
 .top-showcase::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.03));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0.06)),
+    repeating-linear-gradient(90deg, rgba(96, 114, 131, 0.04) 0 1px, transparent 1px 132px),
+    repeating-linear-gradient(0deg, rgba(96, 114, 131, 0.03) 0 1px, transparent 1px 94px);
   pointer-events: none;
 }
 
 .top-showcase::after {
   content: "";
   position: absolute;
-  inset: auto 10% -22% auto;
-  width: 34%;
-  height: 40%;
-  background: radial-gradient(circle, rgba(204, 214, 224, 0.28), rgba(204, 214, 224, 0));
+  inset: auto 8% -28% auto;
+  width: 42%;
+  height: 52%;
+  background: radial-gradient(circle, rgba(152, 169, 185, 0.22), rgba(152, 169, 185, 0));
+  filter: blur(12px);
   pointer-events: none;
 }
 
@@ -104,6 +105,23 @@ body {
   max-width: 1080px;
   margin-left: auto;
   margin-right: auto;
+  text-wrap: balance;
+}
+
+.publication-title-mark {
+  display: inline-block;
+  font-family: 'Cormorant Garamond', 'Castoro', serif;
+  font-weight: 700;
+  letter-spacing: 0.018em;
+  font-size: 1.13em;
+  line-height: 0.95;
+  color: #35506a;
+  background: linear-gradient(135deg, #243d54 0%, #456884 56%, #9b7248 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 6px 18px rgba(84, 108, 131, 0.08);
+  transform: translateY(-0.02em);
 }
 
 .publication-authors {
@@ -377,23 +395,48 @@ body {
   top: 1rem;
   right: 1rem;
   z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.52rem;
   border: 0;
   border-radius: 999px;
   padding: 0.52rem 0.88rem;
   max-width: min(18rem, calc(100% - 2rem));
-  background: rgba(255, 255, 255, 0.92);
-  color: #1f2937;
-  font-weight: 600;
+  background: linear-gradient(135deg, #284057 0%, #365170 58%, #4c6b87 100%);
+  color: #f7fafc;
+  font-weight: 700;
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
-  transition: transform 0.16s ease, background 0.16s ease;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 14px 30px rgba(23, 42, 61, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.pano-tour-reset::before {
+  content: "⇄";
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.95;
 }
 
 .pano-tour-reset:hover {
-  transform: translateY(-1px);
-  background: #ffffff;
+  transform: translateY(-1px) scale(1.01);
+  background: linear-gradient(135deg, #2f4962 0%, #40607e 58%, #557596 100%);
+  box-shadow:
+    0 18px 34px rgba(21, 40, 60, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.pano-tour-reset:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(124, 165, 207, 0.28),
+    0 18px 34px rgba(21, 40, 60, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
 .pano-tour-tooltip {
@@ -629,6 +672,10 @@ body {
 @media screen and (max-width: 768px) {
   .publication-title {
     font-size: 2.15rem !important;
+  }
+
+  .publication-title-mark {
+    font-size: 1.08em;
   }
 
   .content p {
