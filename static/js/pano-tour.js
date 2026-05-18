@@ -113,12 +113,20 @@ function anglesToViewerDirection(yaw, pitch) {
   return [cp * Math.cos(yaw), Math.sin(pitch), cp * Math.sin(yaw)];
 }
 
+function wrapAngle(angle) {
+  return Math.atan2(Math.sin(angle), Math.cos(angle));
+}
+
 function computeDefaultAngles(node) {
   if (node.id === START_VIEWPOINT_ID) {
     const targetNode = VIEWPOINT_MAP.get(START_VIEWPOINT_TARGET_ID);
     if (targetNode) {
       const startDelta = subtractVec(targetNode.position, node.position);
-      return viewerDirectionToAngles(worldDirectionToViewerVector(node, startDelta));
+      const startAngles = viewerDirectionToAngles(worldDirectionToViewerVector(node, startDelta));
+      return {
+        yaw: wrapAngle(startAngles.yaw + Math.PI),
+        pitch: startAngles.pitch
+      };
     }
   }
 
