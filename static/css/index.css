@@ -239,6 +239,74 @@ body {
   opacity: 1;
 }
 
+.pano-tour-hotspots {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.pano-tour-hotspot-button {
+  position: absolute;
+  width: 3.3rem;
+  height: 3.3rem;
+  transform: translate(-50%, -50%);
+  border: 0;
+  background: transparent;
+  padding: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.pano-tour-hotspot-button[hidden] {
+  display: none;
+}
+
+.pano-tour-hotspot-ring,
+.pano-tour-hotspot-core {
+  position: absolute;
+  inset: 50%;
+  display: block;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+}
+
+.pano-tour-hotspot-ring {
+  width: 2.8rem;
+  height: 2.8rem;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow:
+    0 0 0 0.38rem rgba(122, 211, 255, 0.18),
+    0 0 20px rgba(122, 211, 255, 0.55);
+  background: radial-gradient(circle, rgba(122, 211, 255, 0.12), rgba(122, 211, 255, 0));
+  animation: pano-hotspot-pulse 1.8s ease-in-out infinite;
+}
+
+.pano-tour-hotspot-core {
+  width: 0.62rem;
+  height: 0.62rem;
+  background: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.95);
+}
+
+.pano-tour-hotspot-button:hover .pano-tour-hotspot-ring,
+.pano-tour-hotspot-button:focus-visible .pano-tour-hotspot-ring {
+  border-color: #ffd88c;
+  box-shadow:
+    0 0 0 0.48rem rgba(255, 216, 140, 0.22),
+    0 0 24px rgba(255, 216, 140, 0.7);
+}
+
+.pano-tour-hotspot-button:hover .pano-tour-hotspot-core,
+.pano-tour-hotspot-button:focus-visible .pano-tour-hotspot-core {
+  background: #ffd88c;
+  box-shadow: 0 0 16px rgba(255, 216, 140, 0.98);
+}
+
+.pano-tour-hotspot-button:focus-visible {
+  outline: none;
+}
+
 .pano-tour-hud {
   position: absolute;
   top: 1rem;
@@ -508,6 +576,16 @@ body {
     bottom: 0.7rem;
   }
 
+  .pano-tour-hotspot-button {
+    width: 2.8rem;
+    height: 2.8rem;
+  }
+
+  .pano-tour-hotspot-ring {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
   .pano-tour-strip-wrap {
     padding: 0.85rem 0.8rem 1rem;
   }
@@ -533,5 +611,18 @@ body {
 @keyframes pano-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes pano-hotspot-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.95;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
   }
 }
