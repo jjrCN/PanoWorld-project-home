@@ -437,6 +437,58 @@ body {
   gap: 0.55rem;
 }
 
+.results-carousel {
+  overflow: hidden;
+}
+
+.results-carousel.is-static {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.results-carousel .item {
+  margin: 5px;
+  overflow: hidden;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  padding: 0;
+  font-size: 0;
+  background: #0f141b;
+}
+
+.results-carousel video {
+  margin: 0;
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #0f141b;
+}
+
+.results-carousel:not(.is-carousel-ready) {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.results-carousel:not(.is-carousel-ready) > .item {
+  flex: 0 0 calc((100% - 20px) / 3);
+  margin: 0;
+  scroll-snap-align: start;
+}
+
+.results-carousel.is-static .item {
+  margin: 0;
+}
+
+.results-carousel.is-static video {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .pano-tour-point-button {
   border: 1px solid #d7dee8;
   border-radius: 999px;
@@ -592,6 +644,10 @@ body {
     min-height: 260px;
   }
 
+  .results-carousel:not(.is-carousel-ready) > .item {
+    flex-basis: calc((100% - 10px) / 2);
+  }
+
   .pano-tour-hud {
     top: 0.7rem;
     left: 0.7rem;
@@ -650,6 +706,12 @@ body {
   .quantitative-caption {
     font-size: 0.95rem;
     line-height: 1.72;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .results-carousel:not(.is-carousel-ready) > .item {
+    flex-basis: 100%;
   }
 }
 

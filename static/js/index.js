@@ -253,6 +253,152 @@ function setupQuantitativeChartsRendering() {
   observer.observe(section);
 }
 
+function primeCarouselVideo(video) {
+  if (!video || video.dataset.loaded === 'true') {
+    return;
+  }
+
+  var sources = Array.prototype.slice.call(video.querySelectorAll('source[data-src]'));
+  if (!sources.length) {
+    return;
+  }
+
+  sources.forEach(function(source) {
+    source.src = source.dataset.src;
+  });
+  video.dataset.loaded = 'true';
+  video.preload = 'auto';
+  video.load();
+}
+
+function playCarouselVideo(video) {
+  if (!video) {
+    return;
+  }
+
+  primeCarouselVideo(video);
+  video.muted = true;
+  video.defaultMuted = true;
+  video.playsInline = true;
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
+
+  var playPromise = video.play();
+  if (playPromise && typeof playPromise.catch === 'function') {
+    playPromise.catch(function() {});
+  }
+}
+
+function pauseCarouselVideo(video) {
+  if (video && !video.paused) {
+    video.pause();
+  }
+}
+
+function setupLazyCarouselVideosForCarousel(carousel) {
+  var videos = Array.prototype.slice.call(carousel.querySelectorAll('.lazy-carousel-video'));
+
+  if (!carousel || !videos.length) {
+    return;
+  }
+
+  var isCarouselNearViewport = false;
+  var preloadScheduled = false;
+
+  function scheduleCarouselPreload() {
+    if (preloadScheduled) {
+      return;
+    }
+
+    preloadScheduled = true;
+
+    scheduleIdleTask(function() {
+      videos.forEach(function(video, index) {
+        window.setTimeout(function() {
+          primeCarouselVideo(video);
+        }, index * 350);
+      });
+    }, 450);
+  }
+
+  function syncCarouselPlayback() {
+    carousel.dataset.shouldPlay = (isCarouselNearViewport && !document.hidden) ? 'true' : 'false';
+
+    if (carousel.dataset.shouldPlay === 'true') {
+      videos.forEach(primeCarouselVideo);
+      videos.forEach(playCarouselVideo);
+    } else {
+      videos.forEach(pauseCarouselVideo);
+    }
+  }
+
+  videos.forEach(function(video) {
+    video.addEventListener('canplay', function() {
+      if (carousel.dataset.shouldPlay === 'true') {
+        playCarouselVideo(video);
+      }
+    });
+  });
+
+  scheduleCarouselPreload();
+
+  if (!('IntersectionObserver' in window)) {
+    isCarouselNearViewport = true;
+    syncCarouselPlayback();
+    return;
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      isCarouselNearViewport = entry.isIntersecting;
+      syncCarouselPlayback();
+    });
+  }, {
+    rootMargin: '900px 0px',
+    threshold: 0.15
+  });
+
+  observer.observe(carousel);
+
+  document.addEventListener('visibilitychange', function() {
+    syncCarouselPlayback();
+  });
+}
+
+function setupVideoCarousels() {
+  var carousels = Array.prototype.slice.call(document.querySelectorAll('.results-carousel[data-video-carousel="true"]'));
+
+  if (!carousels.length) {
+    return;
+  }
+
+  carousels.forEach(function(carousel) {
+    var resultItems = carousel.querySelectorAll('.item');
+    var visibleSlides = Math.min(3, resultItems.length);
+    var options = {
+      slidesToScroll: 1,
+      slidesToShow: visibleSlides,
+      loop: resultItems.length > visibleSlides,
+      infinite: resultItems.length > visibleSlides,
+      autoplay: false,
+      autoplaySpeed: 3000
+    };
+
+    if (resultItems.length <= 1) {
+      carousel.classList.remove('carousel');
+      carousel.classList.add('is-static');
+    } else if (window.bulmaCarousel && typeof bulmaCarousel.attach === 'function') {
+      bulmaCarousel.attach(carousel, options);
+    }
+
+    if (carousel.classList.contains('is-static') || carousel.querySelector('.slider-container')) {
+      carousel.classList.add('is-carousel-ready');
+    }
+
+    setupLazyCarouselVideosForCarousel(carousel);
+  });
+}
+
 function setupResearchDropdown() {
   var dropdown = document.querySelector('.top-showcase .navbar-item.has-dropdown');
   if (!dropdown) {
@@ -317,6 +463,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   setupResearchDropdown();
+  setupVideoCarousels();
   setupQuantitativeChartsRendering();
   window.addEventListener('resize', scheduleQuantitativeChartsRender);
 });
