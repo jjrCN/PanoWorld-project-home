@@ -65,6 +65,10 @@ const START_VIEWPOINT_TARGET_ID = "0016";
 const PANORAMA_CROSSFADE_DURATION_MS = 520;
 const MAX_TEXTURE_CACHE_SIZE = 8;
 const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
+const ANALYTICS_ENDPOINTS = {
+  stats: "./api/stats",
+  like: "./api/like"
+};
 
 function scheduleIdleTask(callback, timeout) {
   if ("requestIdleCallback" in window) {
@@ -237,6 +241,9 @@ function initPanoramaTour() {
   const currentLabel = document.getElementById("pano-tour-current");
   const styleLabel = document.getElementById("pano-tour-style");
   const styleToggleButton = document.getElementById("pano-tour-style-toggle");
+  const likeButton = document.getElementById("pano-tour-like-toggle");
+  const likeLabel = document.getElementById("pano-tour-like-label");
+  const likeCount = document.getElementById("pano-tour-like-count");
   const minimap = document.getElementById("pano-tour-map");
   const minimapMarkers = document.getElementById("pano-tour-map-markers");
   const hotspotOverlay = document.getElementById("pano-tour-hotspots");
@@ -270,12 +277,17 @@ function initPanoramaTour() {
   let isSwitching = false;
   let initialized = false;
   let animationFrameId = null;
+  let likeRequestInFlight = false;
   const textureLoader = new THREE.TextureLoader();
   const textureEntries = new Map();
   const minimapButtons = new Map();
   const hotspotButtons = new Map();
   const interactiveHotspotIds = new Set();
   const visibleHotspotIds = new Set();
+  const analyticsState = {
+    liked: false,
+    likesCount: 0
+  };
   const pointer = new THREE.Vector2();
   const cameraDirection = new THREE.Vector3();
   const projectedPoint = new THREE.Vector3();
@@ -314,6 +326,65 @@ function initPanoramaTour() {
     }
   }
 
+  function updateLikeButtonUI() {
+    if (!likeButton) {
+      return;
+    }
+
+    const actionLabel = analyticsState.liked ? "已点赞" : "点赞";
+    likeButton.classList.toggle("is-liked", analyticsState.liked);
+    likeButton.classList.toggle("is-busy", likeRequestInFlight);
+    likeButton.disabled = likeRequestInFlight;
+    likeButton.setAttribute("aria-pressed", analyticsState.liked ? "true" : "false");
+    likeButton.title = analyticsState.liked ? "取消点赞" : "点赞";
+    likeButton.setAttribute(
+      "aria-label",
+      (analyticsState.liked ? "取消点赞" : "点赞") + "，当前共有 " + analyticsState.likesCount + " 个赞"
+    );
+
+    if (likeLabel) {
+      likeLabel.textContent = actionLabel;
+    }
+    if (likeCount) {
+      likeCount.textContent = String(analyticsState.likesCount);
+    }
+  }
+
+  function applyAnalyticsPayload(payload) {
+    if (!payload || !payload.likes) {
+      return;
+    }
+
+    analyticsState.liked = Boolean(payload.likes.liked);
+    analyticsState.likesCount = Number(payload.likes.count || 0);
+    updateLikeButtonUI();
+  }
+
+  async function requestAnalytics(url, options) {
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: {
+        Accept: "application/json"
+      },
+      ...options
+    });
+
+    if (!response.ok) {
+      throw new Error("Analytics request failed: " + response.status);
+    }
+
+    return response.json();
+  }
+
+  async function syncAnalytics() {
+    try {
+      const payload = await requestAnalytics(ANALYTICS_ENDPOINTS.stats);
+      applyAnalyticsPayload(payload);
+    } catch (error) {
+      console.error("Failed to fetch analytics stats.", error);
+    }
+  }
+
   function bindStyleToggleControl() {
     if (!styleToggleButton) {
       return;
@@ -330,6 +401,42 @@ function initPanoramaTour() {
       event.stopPropagation();
       switchStyle(getAlternateStyleId(currentStyleId));
       setTooltip(null);
+    });
+  }
+
+  function bindLikeControl() {
+    if (!likeButton) {
+      return;
+    }
+
+    ["pointerdown", "pointermove", "pointerup"].forEach((eventName) => {
+      likeButton.addEventListener(eventName, (event) => {
+        event.stopPropagation();
+      });
+    });
+
+    likeButton.addEventListener("click", async (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+
+      if (likeRequestInFlight) {
+        return;
+      }
+
+      likeRequestInFlight = true;
+      updateLikeButtonUI();
+
+      try {
+        const payload = await requestAnalytics(ANALYTICS_ENDPOINTS.like, {
+          method: "POST"
+        });
+        applyAnalyticsPayload(payload);
+      } catch (error) {
+        console.error("Failed to toggle like state.", error);
+      } finally {
+        likeRequestInFlight = false;
+        updateLikeButtonUI();
+      }
     });
   }
 
@@ -1013,8 +1120,11 @@ function initPanoramaTour() {
 
   buildMinimap();
   bindMinimapControl();
+  bindLikeControl();
   updateStyleUI();
+  updateLikeButtonUI();
   setCurrentLabel(currentViewpointId);
+  syncAnalytics();
 
   boot();
 

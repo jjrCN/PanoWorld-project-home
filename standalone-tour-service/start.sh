@@ -5,11 +5,17 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SITE_DIR="$ROOT_DIR/site"
 PID_FILE="$ROOT_DIR/server.pid"
 LOG_FILE="$ROOT_DIR/server.log"
+SERVER_FILE="$ROOT_DIR/server.py"
 PORT="${PORT:-8001}"
 HOST="${HOST:-0.0.0.0}"
 
 if [[ ! -d "$SITE_DIR" ]]; then
   echo "Site directory not found: $SITE_DIR" >&2
+  exit 1
+fi
+
+if [[ ! -f "$SERVER_FILE" ]]; then
+  echo "Server entry not found: $SERVER_FILE" >&2
   exit 1
 fi
 
@@ -33,7 +39,7 @@ if command -v lsof >/dev/null 2>&1; then
   fi
 fi
 
-nohup python3 -m http.server "$PORT" --bind "$HOST" --directory "$SITE_DIR" >"$LOG_FILE" 2>&1 &
+nohup python3 "$SERVER_FILE" --host "$HOST" --port "$PORT" --site-dir "$SITE_DIR" >"$LOG_FILE" 2>&1 &
 SERVER_PID="$!"
 echo "$SERVER_PID" >"$PID_FILE"
 

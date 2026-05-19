@@ -8,8 +8,8 @@
   <link rel="preload" as="image" href="./assets/images/pano-tour-map.webp" type="image/webp">
   <link rel="preload" as="image" href="./assets/panos/0000.webp" type="image/webp">
   <link rel="preload" as="image" href="./assets/panos-simple/0000.webp" type="image/webp">
-  <link rel="stylesheet" href="./static/css/tour.css?v=20260519a">
-  <script type="module" src="./static/js/pano-tour.js?v=20260519a"></script>
+  <link rel="stylesheet" href="./static/css/tour.css?v=20260519b">
+  <script type="module" src="./static/js/pano-tour.js?v=20260519b"></script>
 </head>
 <body>
   <main class="tour-app">
@@ -68,7 +68,14 @@
             <span id="pano-tour-current" class="pano-tour-badge">点位 0000</span>
             <span id="pano-tour-style" class="pano-tour-badge pano-tour-badge--secondary">法式轻奢风格</span>
           </div>
-          <button id="pano-tour-style-toggle" class="pano-tour-reset" type="button">切换到现代简约风格</button>
+          <div class="pano-tour-stage-actions">
+            <button id="pano-tour-like-toggle" class="pano-tour-like-button" type="button" aria-pressed="false">
+              <span class="pano-tour-like-icon" aria-hidden="true">❤</span>
+              <span id="pano-tour-like-label" class="pano-tour-like-label">点赞</span>
+              <span id="pano-tour-like-count" class="pano-tour-like-count">0</span>
+            </button>
+            <button id="pano-tour-style-toggle" class="pano-tour-reset" type="button">切换到现代简约风格</button>
+          </div>
           <div id="pano-tour-tooltip" class="pano-tour-tooltip" hidden></div>
         </div>
       </div>

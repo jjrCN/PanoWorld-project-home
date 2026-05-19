@@ -274,7 +274,7 @@ strong {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  right: min(18.5rem, 34vw);
+  right: min(23rem, 42vw);
   z-index: 6;
   display: flex;
   flex-wrap: wrap;
@@ -302,11 +302,20 @@ strong {
   font-weight: 600;
 }
 
-.pano-tour-reset {
+.pano-tour-stage-actions {
   position: absolute;
   top: 1rem;
   right: 1rem;
   z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.7rem;
+  width: min(18rem, calc(100% - 2rem));
+}
+
+.pano-tour-like-button,
+.pano-tour-reset {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -314,7 +323,7 @@ strong {
   border: 0;
   border-radius: 999px;
   padding: 0.72rem 1rem;
-  max-width: min(18rem, calc(100% - 2rem));
+  max-width: 100%;
   background: linear-gradient(135deg, #294157 0%, #375372 56%, #50708d 100%);
   color: #f7fafc;
   font-weight: 700;
@@ -326,6 +335,74 @@ strong {
     0 14px 28px rgba(23, 42, 61, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.18);
   transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+}
+
+.pano-tour-like-button {
+  min-width: 7.5rem;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(17, 28, 44, 0.88) 0%, rgba(32, 49, 72, 0.86) 100%);
+  box-shadow:
+    0 14px 28px rgba(12, 21, 34, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.pano-tour-like-icon {
+  font-size: 0.98rem;
+  line-height: 1;
+  color: #ffd6de;
+  text-shadow: 0 0 12px rgba(255, 140, 164, 0.22);
+}
+
+.pano-tour-like-label {
+  letter-spacing: 0.02em;
+}
+
+.pano-tour-like-count {
+  min-width: 1.6rem;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(247, 250, 252, 0.96);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.pano-tour-like-button:hover {
+  transform: translateY(-1px) scale(1.01);
+  background: linear-gradient(135deg, rgba(24, 37, 56, 0.94) 0%, rgba(42, 62, 88, 0.92) 100%);
+  box-shadow:
+    0 18px 32px rgba(12, 24, 38, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.pano-tour-like-button:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(124, 165, 207, 0.28),
+    0 18px 32px rgba(12, 24, 38, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.pano-tour-like-button.is-liked {
+  background: linear-gradient(135deg, #7b243f 0%, #9e3550 54%, #bb5570 100%);
+  box-shadow:
+    0 16px 32px rgba(98, 28, 49, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.pano-tour-like-button.is-liked .pano-tour-like-icon {
+  color: #fff1f4;
+  text-shadow: 0 0 16px rgba(255, 228, 233, 0.42);
+}
+
+.pano-tour-like-button.is-liked .pano-tour-like-count {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.pano-tour-like-button.is-busy,
+.pano-tour-reset.is-busy {
+  cursor: wait;
+  opacity: 0.78;
 }
 
 .pano-tour-reset::before {
@@ -661,11 +738,16 @@ strong {
     font-size: 0.84rem;
   }
 
-  .pano-tour-reset {
+  .pano-tour-stage-actions {
     top: auto;
     right: 0.85rem;
     bottom: 0.85rem;
-    max-width: calc(100% - 1.7rem);
+    width: calc(100% - 1.7rem);
+    gap: 0.55rem;
+  }
+
+  .pano-tour-like-button,
+  .pano-tour-reset {
     padding: 0.66rem 0.9rem;
     font-size: 0.86rem;
   }
