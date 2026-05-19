@@ -70,7 +70,7 @@ const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
 const START_VIEWPOINT_ID = "0000";
 const START_VIEWPOINT_TARGET_ID = "0016";
 const PANORAMA_CROSSFADE_DURATION_MS = 520;
-const MAX_TEXTURE_CACHE_SIZE = 8;
+const MAX_TEXTURE_CACHE_SIZE = 18;
 const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
 const ANALYTICS_ENDPOINTS = {
   stats: "./api/stats",
@@ -293,6 +293,7 @@ function initPanoramaTour() {
   let initialized = false;
   let animationFrameId = null;
   let likeRequestInFlight = false;
+  let currentStylePrefetchTicket = 0;
   const textureLoader = new THREE.TextureLoader();
   const textureEntries = new Map();
   const minimapButtons = new Map();
@@ -840,6 +841,28 @@ function initPanoramaTour() {
     }, 1500);
   }
 
+  function prefetchCurrentStyleViewpoints() {
+    const styleId = currentStyleId;
+    const viewpointId = currentViewpointId;
+    const ticket = ++currentStylePrefetchTicket;
+
+    scheduleIdleTask(() => {
+      VIEWPOINTS.forEach((node, nodeIndex) => {
+        if (node.id === viewpointId) {
+          return;
+        }
+
+        window.setTimeout(() => {
+          if (ticket !== currentStylePrefetchTicket || currentStyleId !== styleId) {
+            return;
+          }
+
+          loadTextureForNode(styleId, node.id).catch(() => {});
+        }, nodeIndex * 170);
+      });
+    }, 800);
+  }
+
   function buildMinimap() {
     if (!minimapMarkers) {
       return;
@@ -1030,6 +1053,7 @@ function initPanoramaTour() {
         isSwitching = false;
         pruneTextureCache();
         prefetchSiblingStylesForCurrentViewpoint();
+        prefetchCurrentStyleViewpoints();
       }
     }
 
@@ -1129,6 +1153,7 @@ function initPanoramaTour() {
       hideLoading();
       prefetchPanoramaImages();
       prefetchSiblingStylesForCurrentViewpoint();
+      prefetchCurrentStyleViewpoints();
       animate(performance.now());
     } catch (error) {
       console.error(error);
