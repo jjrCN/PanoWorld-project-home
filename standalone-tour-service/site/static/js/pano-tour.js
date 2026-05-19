@@ -13,14 +13,14 @@ const DEFAULT_STYLE_ID = STYLE_FRENCH_LUXURY;
 const PANORAMA_STYLES = {
   [STYLE_FRENCH_LUXURY]: {
     id: STYLE_FRENCH_LUXURY,
-    label: "French luxury style",
-    buttonLabel: "Switch to Modern minimalist style",
+    label: "法式轻奢风格",
+    buttonLabel: "切换到现代极简风格",
     assetDir: "./assets/panos"
   },
   [STYLE_MODERN_MINIMALIST]: {
     id: STYLE_MODERN_MINIMALIST,
-    label: "Modern minimalist style",
-    buttonLabel: "Switch to French luxury style",
+    label: "现代极简风格",
+    buttonLabel: "切换到法式轻奢风格",
     assetDir: "./assets/panos-simple"
   }
 };
@@ -291,7 +291,7 @@ function initPanoramaTour() {
   }
 
   function setCurrentLabel(id) {
-    currentLabel.textContent = "Viewpoint " + id;
+    currentLabel.textContent = "点位 " + id;
     minimapButtons.forEach((button, buttonId) => {
       button.classList.toggle("is-active", buttonId === id);
     });
@@ -355,7 +355,7 @@ function initPanoramaTour() {
     const x = ((projected.x + 1) / 2) * rect.width;
     const y = ((-projected.y + 1) / 2) * rect.height;
 
-    tooltip.textContent = "Jump to viewpoint " + hoverHotspot.userData.id;
+    tooltip.textContent = "跳转到点位 " + hoverHotspot.userData.id;
     tooltip.style.left = x + "px";
     tooltip.style.top = y + "px";
   }
@@ -375,8 +375,8 @@ function initPanoramaTour() {
     button.type = "button";
     button.className = "pano-tour-hotspot-button";
     button.hidden = true;
-    button.title = "Jump to viewpoint " + id;
-    button.setAttribute("aria-label", "Jump to viewpoint " + id);
+    button.title = "跳转到点位 " + id;
+    button.setAttribute("aria-label", "跳转到点位 " + id);
     button.innerHTML = [
       '<span class="pano-tour-hotspot-ring pano-tour-hotspot-ring--outer" aria-hidden="true"></span>',
       '<span class="pano-tour-hotspot-ring pano-tour-hotspot-ring--inner" aria-hidden="true"></span>',
@@ -404,7 +404,7 @@ function initPanoramaTour() {
     button.addEventListener("mouseenter", () => {
       stage.style.cursor = "pointer";
       tooltip.hidden = false;
-      tooltip.textContent = "Jump to viewpoint " + id;
+      tooltip.textContent = "跳转到点位 " + id;
       tooltip.style.left = button.style.left;
       tooltip.style.top = button.style.top;
     });
@@ -561,7 +561,7 @@ function initPanoramaTour() {
       );
 
       if (!isVisible) {
-        if (tooltip.textContent === "Jump to viewpoint " + id) {
+        if (tooltip.textContent === "跳转到点位 " + id) {
           tooltip.hidden = true;
         }
         button.hidden = true;
@@ -714,8 +714,8 @@ function initPanoramaTour() {
       if (marker.labelClass) {
         button.classList.add(marker.labelClass);
       }
-      button.title = "Jump to viewpoint " + node.id;
-      button.setAttribute("aria-label", "Jump to viewpoint " + node.id + " on floorplan map");
+      button.title = "在户型图中跳转到点位 " + node.id;
+      button.setAttribute("aria-label", "在户型图中跳转到点位 " + node.id);
       button.style.left = marker.xPct + "%";
       button.style.top = marker.yPct + "%";
       button.innerHTML = [
@@ -788,7 +788,7 @@ function initPanoramaTour() {
     }
 
     isSwitching = true;
-    showLoading("Loading viewpoint " + nextNodeId + "...");
+    showLoading("正在加载点位 " + nextNodeId + "...");
 
     const nextAngles = preserveOrientation ? computePreservedAngles(nextNodeId) : computeDefaultAngles(VIEWPOINT_MAP.get(nextNodeId));
     try {
@@ -797,7 +797,7 @@ function initPanoramaTour() {
       startCrossFade(texture, nextNodeId, nextAngles, currentStyleId);
     } catch (error) {
       console.error(error);
-      showLoading("Unable to load viewpoint " + nextNodeId);
+      showLoading("无法加载点位 " + nextNodeId);
       window.setTimeout(hideLoading, 1400);
       isSwitching = false;
     }
@@ -809,7 +809,7 @@ function initPanoramaTour() {
     }
 
     isSwitching = true;
-    showLoading("Switching to " + getStyleConfig(nextStyleId).label + "...");
+    showLoading("正在切换到" + getStyleConfig(nextStyleId).label + "...");
 
     try {
       const texture = await loadTextureForNode(nextStyleId, currentViewpointId);
@@ -817,7 +817,7 @@ function initPanoramaTour() {
       startCrossFade(texture, currentViewpointId, { yaw, pitch }, nextStyleId);
     } catch (error) {
       console.error(error);
-      showLoading("Unable to load " + getStyleConfig(nextStyleId).label);
+      showLoading("无法加载" + getStyleConfig(nextStyleId).label);
       window.setTimeout(hideLoading, 1400);
       isSwitching = false;
     }
@@ -974,7 +974,7 @@ function initPanoramaTour() {
     applyCameraOrientation();
     updateStyleUI();
 
-    showLoading("Loading panorama tour...");
+    showLoading("正在加载全景漫游...");
     try {
       const texture = await loadTextureForNode(currentStyleId, START_VIEWPOINT_ID);
       activeSphere.material.map = texture;
@@ -988,7 +988,7 @@ function initPanoramaTour() {
       animate(performance.now());
     } catch (error) {
       console.error(error);
-      showLoading("Unable to initialize the panorama tour.");
+      showLoading("全景漫游初始化失败。");
     }
   }
 
