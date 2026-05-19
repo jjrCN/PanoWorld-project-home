@@ -14,12 +14,12 @@ const PANORAMA_STYLES = {
   [STYLE_FRENCH_LUXURY]: {
     id: STYLE_FRENCH_LUXURY,
     label: "法式轻奢风格",
-    buttonLabel: "切换到现代极简风格",
+    buttonLabel: "切换到现代简约风格",
     assetDir: "./assets/panos"
   },
   [STYLE_MODERN_MINIMALIST]: {
     id: STYLE_MODERN_MINIMALIST,
-    label: "现代极简风格",
+    label: "现代简约风格",
     buttonLabel: "切换到法式轻奢风格",
     assetDir: "./assets/panos-simple"
   }
