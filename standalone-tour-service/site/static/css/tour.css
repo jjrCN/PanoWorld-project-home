@@ -108,6 +108,18 @@ strong {
   color: #24384c;
 }
 
+.pano-tour-copy a {
+  color: #2d5f88;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.14em;
+}
+
+.pano-tour-copy a:hover {
+  color: #1f4d73;
+}
+
 .pano-tour-guidance {
   max-width: 40rem;
   padding: 0.75rem 0.9rem;
