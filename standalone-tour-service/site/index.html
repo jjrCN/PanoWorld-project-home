@@ -8,14 +8,19 @@
   <link rel="preload" as="image" href="./assets/images/pano-tour-map.webp" type="image/webp">
   <link rel="preload" as="image" href="./assets/panos/0000.webp" type="image/webp">
   <link rel="preload" as="image" href="./assets/panos-simple/0000.webp" type="image/webp">
-  <link rel="stylesheet" href="./static/css/tour.css?v=20260519b">
-  <script type="module" src="./static/js/pano-tour.js?v=20260519b"></script>
+  <link rel="stylesheet" href="./static/css/tour.css?v=20260519c">
+  <script type="module" src="./static/js/pano-tour.js?v=20260519c"></script>
 </head>
 <body>
   <main class="tour-app">
     <section class="tour-shell" aria-labelledby="tour-title">
       <div class="tour-header">
-        <p class="tour-kicker">PanoWorld 独立交互服务（贝壳-多模智能-AI渲染团队）</p>
+        <button id="pano-tour-like-toggle" class="pano-tour-like-button pano-tour-like-button--page" type="button" aria-pressed="false">
+          <span class="pano-tour-like-icon" aria-hidden="true">❤</span>
+          <span id="pano-tour-like-label" class="pano-tour-like-label">点赞</span>
+          <span id="pano-tour-like-count" class="pano-tour-like-count">0</span>
+        </button>
+        <p class="tour-kicker">AI全景生成独立交互服务（贝壳-多模智能-AI渲染团队）</p>
         <h1 id="tour-title" class="tour-title">全屋全景交互漫游</h1>
       </div>
 
@@ -23,10 +28,10 @@
         <div class="pano-tour-overview">
           <div class="pano-tour-copy">
             <p>
-              通过 VR 风格的查看器探索 <strong>PanoWorld</strong> 生成的全屋全景结果。
+              通过 VR 风格的查看器探索AI算法生成的全屋全景结果。
             </p>
             <p>
-              给定户型图和风格参考图，PanoWorld 可以为整套房屋生成一组多点位全景图，并在不同视角之间保持较强的一致性。
+              给定户型图和风格参考图，AI算法可以为整套房屋生成一组多点位一致的指定风格全景图，并在不同视角之间保持较强的一致性。
             </p>
             <p>
               你可以在 <strong>法式轻奢风格</strong> 与 <strong>现代简约风格</strong> 之间切换，同时保持当前点位与视角连续。
@@ -69,11 +74,6 @@
             <span id="pano-tour-style" class="pano-tour-badge pano-tour-badge--secondary">法式轻奢风格</span>
           </div>
           <div class="pano-tour-stage-actions">
-            <button id="pano-tour-like-toggle" class="pano-tour-like-button" type="button" aria-pressed="false">
-              <span class="pano-tour-like-icon" aria-hidden="true">❤</span>
-              <span id="pano-tour-like-label" class="pano-tour-like-label">点赞</span>
-              <span id="pano-tour-like-count" class="pano-tour-like-count">0</span>
-            </button>
             <button id="pano-tour-style-toggle" class="pano-tour-reset" type="button">切换到现代简约风格</button>
           </div>
           <div id="pano-tour-tooltip" class="pano-tour-tooltip" hidden></div>
