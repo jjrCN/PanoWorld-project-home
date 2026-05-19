@@ -780,6 +780,58 @@ body {
   margin-top: 2rem;
 }
 
+.bibtex-card {
+  margin-top: 1rem;
+  padding: 1.1rem 1.1rem 1rem;
+  border: 1px solid #d9dde5;
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.bibtex-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.bibtex-toolbar .title {
+  margin-bottom: 0 !important;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.bibtex-copy-button {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+.bibtex-card pre {
+  margin: 0;
+  padding: 1rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid #e2e7ef;
+  background: #ffffff !important;
+  color: #111827 !important;
+  overflow-x: auto;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+.bibtex-card code {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre;
+  color: #111827 !important;
+  background: transparent !important;
+}
+
+.bibtex-card pre code {
+  display: block;
+  padding: 0;
+  color: #111827 !important;
+  background: transparent !important;
+}
+
 .quantitative-subcard {
   background: #fbfcfe;
   border: 1px solid #e7ebf2;
@@ -882,6 +934,14 @@ body {
 }
 
 @media screen and (max-width: 768px) {
+  .bibtex-toolbar {
+    align-items: flex-start;
+  }
+
+  .bibtex-copy-button {
+    margin-left: auto;
+  }
+
   .publication-title {
     font-size: 2.15rem !important;
   }

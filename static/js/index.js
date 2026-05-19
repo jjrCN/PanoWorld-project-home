@@ -253,6 +253,79 @@ function setupQuantitativeChartsRendering() {
   observer.observe(section);
 }
 
+function copyTextToClipboard(text) {
+  return new Promise(function(resolve, reject) {
+    function fallbackCopy() {
+      var textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      textArea.style.pointerEvents = 'none';
+      textArea.style.left = '0';
+      textArea.style.top = '0';
+      textArea.style.width = '1px';
+      textArea.style.height = '1px';
+      document.body.appendChild(textArea);
+
+      textArea.focus({preventScroll: true});
+      textArea.select();
+      textArea.setSelectionRange(0, textArea.value.length);
+
+      try {
+        var successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        if (successful) {
+          resolve();
+        } else {
+          reject(new Error('Copy command was unsuccessful.'));
+        }
+      } catch (error) {
+        document.body.removeChild(textArea);
+        reject(error);
+      }
+    }
+
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(text).then(resolve).catch(function() {
+        fallbackCopy();
+      });
+      return;
+    }
+
+    fallbackCopy();
+  });
+}
+
+function setupBibtexCopy() {
+  var copyButton = document.getElementById('copy-bibtex-button');
+  var copyLabel = document.getElementById('copy-bibtex-label');
+  var bibtexBlock = document.getElementById('bibtex-content');
+
+  if (!copyButton || !copyLabel || !bibtexBlock) {
+    return;
+  }
+
+  var defaultText = 'Copy BibTeX';
+  var bibtexCode = bibtexBlock.querySelector('code');
+
+  copyButton.addEventListener('click', function(event) {
+    event.preventDefault();
+    var bibtexText = bibtexCode ? bibtexCode.innerText : bibtexBlock.innerText;
+
+    copyTextToClipboard(bibtexText).then(function() {
+      copyLabel.textContent = 'Copied';
+      window.setTimeout(function() {
+        copyLabel.textContent = defaultText;
+      }, 1600);
+    }).catch(function() {
+      copyLabel.textContent = 'Copy Failed';
+      window.setTimeout(function() {
+        copyLabel.textContent = defaultText;
+      }, 1800);
+    });
+  });
+}
+
 function primeCarouselVideo(video) {
   if (!video || video.dataset.loaded === 'true') {
     return;
@@ -465,5 +538,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setupResearchDropdown();
   setupVideoCarousels();
   setupQuantitativeChartsRendering();
+  setupBibtexCopy();
   window.addEventListener('resize', scheduleQuantitativeChartsRender);
 });
