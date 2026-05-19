@@ -7,6 +7,7 @@ module from the PanoWorld project homepage.
 
 - `site/`: static files served at `http://<host>:8001/`
 - `server.py`: lightweight HTTP server with persistent like/visit analytics
+- `count_unique_visitors.py`: count unique visitor IPs from `analytics.json`
 - `start.sh`: start the local HTTP server in the background
 - `stop.sh`: stop the running server
 - `status.sh`: inspect whether the service is running
@@ -22,3 +23,14 @@ When started on the target desktop, the service listens on:
 In the current lab network, this should be reachable as:
 
 - `http://10.35.28.39:8001/`
+
+## Count unique visitor IPs
+
+Run the following on the target desktop:
+
+- `python3 ~/panoworld-tour/count_unique_visitors.py`
+
+This counts unique visitor IPs from `~/panoworld-tour/analytics.json` and excludes `127.0.0.1` by default.
+If you also want to print the IP list:
+
+- `python3 ~/panoworld-tour/count_unique_visitors.py --show-ips`
