@@ -997,24 +997,7 @@ function initPanoramaTour() {
   updateStyleUI();
   setCurrentLabel(currentViewpointId);
 
-  if (!("IntersectionObserver" in window)) {
-    boot();
-    return;
-  }
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        observer.disconnect();
-        boot();
-      }
-    });
-  }, {
-    rootMargin: "320px 0px",
-    threshold: 0.01
-  });
-
-  observer.observe(stage);
+  boot();
 
   window.addEventListener("beforeunload", () => {
     if (animationFrameId !== null) {
