@@ -5,7 +5,7 @@ module from the PanoWorld project homepage.
 
 ## Layout
 
-- `site/`: static files served at `http://<host>:8002/`
+- `site/`: static files served at `http://<host>:8001/`
 - `start.sh`: start the local HTTP server in the background
 - `stop.sh`: stop the running server
 - `status.sh`: inspect whether the service is running
@@ -15,8 +15,8 @@ module from the PanoWorld project homepage.
 
 When started on the target desktop, the service listens on:
 
-- `http://0.0.0.0:8002/`
+- `http://0.0.0.0:8001/`
 
 In the current lab network, this should be reachable as:
 
-- `http://10.35.28.39:8002/`
+- `http://10.35.28.39:8001/`

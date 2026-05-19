@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PID_FILE="$ROOT_DIR/server.pid"
-PORT="${PORT:-8002}"
+PORT="${PORT:-8001}"
 
 if [[ -f "$PID_FILE" ]]; then
   SERVER_PID="$(cat "$PID_FILE" 2>/dev/null || true)"

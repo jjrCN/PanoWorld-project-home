@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SITE_DIR="$ROOT_DIR/site"
 PID_FILE="$ROOT_DIR/server.pid"
 LOG_FILE="$ROOT_DIR/server.log"
-PORT="${PORT:-8002}"
+PORT="${PORT:-8001}"
 HOST="${HOST:-0.0.0.0}"
 
 if [[ ! -d "$SITE_DIR" ]]; then
