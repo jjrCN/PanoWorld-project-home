@@ -254,6 +254,7 @@ function initPanoramaTour() {
   let hotspotTexture;
   let raycaster;
   let hoverHotspot = null;
+  let hoverHotspotId = null;
   let currentViewpointId = START_VIEWPOINT_ID;
   let currentStyleId = DEFAULT_STYLE_ID;
   let yaw = 0;
@@ -290,11 +291,16 @@ function initPanoramaTour() {
     loading.classList.add("is-hidden");
   }
 
+  function updateMinimapHighlightState() {
+    minimapButtons.forEach((button, buttonId) => {
+      button.classList.toggle("is-active", buttonId === currentViewpointId);
+      button.classList.toggle("is-preview", buttonId === hoverHotspotId);
+    });
+  }
+
   function setCurrentLabel(id) {
     currentLabel.textContent = "点位 " + id;
-    minimapButtons.forEach((button, buttonId) => {
-      button.classList.toggle("is-active", buttonId === id);
-    });
+    updateMinimapHighlightState();
   }
 
   function updateStyleUI() {
@@ -339,8 +345,15 @@ function initPanoramaTour() {
     });
   }
 
-  function setTooltip(sprite) {
+  function setHoveredHotspot(sprite, hotspotId) {
     hoverHotspot = sprite || null;
+    hoverHotspotId = hotspotId || (sprite ? sprite.userData.id : null);
+    updateMinimapHighlightState();
+    updateHotspotHoverState();
+  }
+
+  function setTooltip(sprite) {
+    setHoveredHotspot(sprite, sprite ? sprite.userData.id : null);
     tooltip.hidden = !sprite;
     stage.style.cursor = sprite ? "pointer" : (isPointerDown ? "grabbing" : "grab");
   }
@@ -402,6 +415,7 @@ function initPanoramaTour() {
     });
 
     button.addEventListener("mouseenter", () => {
+      setHoveredHotspot(null, id);
       stage.style.cursor = "pointer";
       tooltip.hidden = false;
       tooltip.textContent = "跳转到点位 " + id;
@@ -410,6 +424,7 @@ function initPanoramaTour() {
     });
 
     button.addEventListener("mouseleave", () => {
+      setHoveredHotspot(null, null);
       stage.style.cursor = isPointerDown ? "grabbing" : "grab";
       tooltip.hidden = true;
     });
@@ -519,8 +534,12 @@ function initPanoramaTour() {
   }
 
   function updateHotspotHoverState() {
+    if (!hotspotGroup) {
+      return;
+    }
+
     hotspotGroup.children.forEach((sprite) => {
-      const isHovered = hoverHotspot === sprite;
+      const isHovered = hoverHotspotId === sprite.userData.id;
       const targetScale = sprite.userData.baseScale * (isHovered ? 1.18 : 1);
       sprite.scale.set(targetScale, targetScale, targetScale);
       sprite.material.color.set(isHovered ? "#ffcf70" : "#7ad3ff");
@@ -606,7 +625,7 @@ function initPanoramaTour() {
       entry.button.setAttribute("aria-disabled", blockedByNearer ? "true" : "false");
 
       if (blockedByNearer) {
-        if (hoverHotspot === entry.sprite) {
+        if (hoverHotspotId === entry.id) {
           setTooltip(null);
         }
         return;
