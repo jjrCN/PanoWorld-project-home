@@ -35,9 +35,10 @@ This reads `~/panoworld-tour/analytics.json` and reports:
 - unique visitor IP count (excluding `127.0.0.1` by default)
 - cumulative total visits
 - daily total visits
+- daily unique IP counts
 - total likes
 
-Daily totals are displayed from the stored `visits.by_day` entries and are labeled in UTC+8.
+Daily rows are displayed in UTC+8 with both `总访问次数` and `去重IP数`.
 If you also want to print the IP list:
 
 - `python3 ~/panoworld-tour/count_unique_visitors.py --show-ips`

@@ -60,11 +60,12 @@ def collect_unique_ips(data: dict, excluded_ips: set[str]) -> list[str]:
     return sorted(set(unique_ips))
 
 
-def collect_daily_visits(data: dict) -> list[tuple[str, int]]:
+def collect_daily_visit_rows(data: dict, excluded_ips: set[str]) -> list[tuple[str, int, int]]:
     visits = data.get("visits") or {}
     by_day = visits.get("by_day") or {}
+    by_ip = visits.get("by_ip") or {}
 
-    normalized = []
+    day_totals: dict[str, int] = {}
     for raw_day, raw_count in by_day.items():
         day = str(raw_day).strip()
         if not day:
@@ -73,7 +74,34 @@ def collect_daily_visits(data: dict) -> list[tuple[str, int]]:
             count = int(raw_count)
         except (TypeError, ValueError):
             continue
-        normalized.append((day, count))
+        day_totals[day] = count
+
+    day_unique_ips: dict[str, set[str]] = {}
+    for raw_ip, ip_entry in by_ip.items():
+        ip = str(raw_ip).strip()
+        if not ip or ip in excluded_ips:
+            continue
+
+        per_day = {}
+        if isinstance(ip_entry, dict):
+            per_day = ip_entry.get("by_day") or {}
+
+        for raw_day, raw_count in per_day.items():
+            day = str(raw_day).strip()
+            if not day:
+                continue
+            try:
+                count = int(raw_count)
+            except (TypeError, ValueError):
+                continue
+            if count <= 0:
+                continue
+            day_unique_ips.setdefault(day, set()).add(ip)
+
+    all_days = sorted(set(day_totals.keys()) | set(day_unique_ips.keys()))
+    normalized = []
+    for day in all_days:
+        normalized.append((day, day_totals.get(day, 0), len(day_unique_ips.get(day, set()))))
 
     return sorted(normalized, key=lambda item: item[0])
 
@@ -102,7 +130,7 @@ def main() -> int:
         data = load_json(analytics_path)
         unique_ips = collect_unique_ips(data, excluded_ips)
         total_visits = collect_total_visits(data)
-        daily_visits = collect_daily_visits(data)
+        daily_visits = collect_daily_visit_rows(data, excluded_ips)
         total_likes = collect_total_likes(data)
     except (FileNotFoundError, ValueError) as exc:
         print(str(exc), file=sys.stderr)
@@ -115,11 +143,11 @@ def main() -> int:
     print(f"独立版页面去重访问 IP 数（已排除 {excluded_list}）：{len(unique_ips)}")
     print(f"累计总访问次数：{total_visits}")
     print(f"总点赞量：{total_likes}")
-    print(f"每天的总访问次数（按 UTC+8 统计，当前日期 {current_day_utc8}）：")
+    print(f"每天的访问统计（按 UTC+8 统计，当前日期 {current_day_utc8}）：")
 
     if daily_visits:
-        for day, count in daily_visits:
-            print(f"{day}: {count}")
+        for day, total_count, unique_ip_count in daily_visits:
+            print(f"{day}: 总访问次数 {total_count}，去重IP数 {unique_ip_count}")
     else:
         print("(暂无按天访问数据)")
 
