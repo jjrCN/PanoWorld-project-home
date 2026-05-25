@@ -18,17 +18,21 @@
         imagesizes="(max-width: 1023px) calc(100vw - 3rem), 960px"
         type="image/webp"
         fetchpriority="high">
+  <link rel="preload"
+        as="image"
+        href="./assets/panos-chinese/0000.webp"
+        type="image/webp">
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro|Cormorant+Garamond:ital,wght@0,600;0,700;1,700&display=swap"
         rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
   <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=20260519b">
+  <link rel="stylesheet" href="./static/css/index.css?v=20260525a">
   <link rel="icon" type="image/svg+xml" href="./static/images/favicon.svg?v=20260518a">
 
   <script defer src="./static/js/bulma-carousel.min.js"></script>
-  <script defer src="./static/js/index.js?v=20260519b"></script>
-  <script type="module" src="./static/js/pano-tour.js?v=20260519a"></script>
+  <script defer src="./static/js/index.js?v=20260525a"></script>
+  <script type="module" src="./static/js/pano-tour.js?v=20260525a"></script>
 </head>
 <body>
 
@@ -381,6 +385,22 @@
                  decoding="async"
                  loading="lazy">
           </picture>
+        </div>
+        <div class="feature-video">
+          <video poster="./assets/images/qualitative-whole-house-demo-poster.jpg"
+                 id="qualitative-whole-house-demo"
+                 controls
+                 muted
+                 loop
+                 playsinline
+                 preload="none"
+                 class="lazy-inline-video"
+                 data-autoplay-when-visible="true">
+            <source data-src="./assets/videos/qualitative-whole-house-demo_web_av1.mp4"
+                    type='video/mp4; codecs="av01.0.05M.08"'>
+            <source data-src="./assets/videos/qualitative-whole-house-demo_web.mp4"
+                    type="video/mp4">
+          </video>
         </div>
         <div class="content has-text-justified section-copy">
           <p>

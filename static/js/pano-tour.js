@@ -8,6 +8,7 @@ const COMMON_ROTATION = [
 
 const STYLE_FRENCH_LUXURY = "french-luxury";
 const STYLE_MODERN_MINIMALIST = "modern-minimalist";
+const STYLE_NEW_CHINESE = "new-chinese";
 const DEFAULT_STYLE_ID = STYLE_FRENCH_LUXURY;
 
 const PANORAMA_STYLES = {
@@ -20,12 +21,18 @@ const PANORAMA_STYLES = {
   [STYLE_MODERN_MINIMALIST]: {
     id: STYLE_MODERN_MINIMALIST,
     label: "Modern minimalist style",
-    buttonLabel: "Switch to French luxury style",
+    buttonLabel: "Switch to New Chinese style",
     assetDir: "./assets/panos-simple"
+  },
+  [STYLE_NEW_CHINESE]: {
+    id: STYLE_NEW_CHINESE,
+    label: "New Chinese style",
+    buttonLabel: "Switch to French luxury style",
+    assetDir: "./assets/panos-chinese"
   }
 };
 
-const PANORAMA_STYLE_IDS = [STYLE_FRENCH_LUXURY, STYLE_MODERN_MINIMALIST];
+const PANORAMA_STYLE_IDS = [STYLE_FRENCH_LUXURY, STYLE_MODERN_MINIMALIST, STYLE_NEW_CHINESE];
 
 const VIEWPOINTS = [
   { id: "0000", position: [0.7237534, -1.055, 1.35], rotation: COMMON_ROTATION },
@@ -63,7 +70,7 @@ const VIEWPOINT_MAP = new Map(VIEWPOINTS.map((node) => [node.id, node]));
 const START_VIEWPOINT_ID = "0000";
 const START_VIEWPOINT_TARGET_ID = "0016";
 const PANORAMA_CROSSFADE_DURATION_MS = 520;
-const MAX_TEXTURE_CACHE_SIZE = 8;
+const MAX_TEXTURE_CACHE_SIZE = 18;
 const VIEWER_FORWARD = new THREE.Vector3(1, 0, 0);
 
 function scheduleIdleTask(callback, timeout) {
@@ -83,8 +90,16 @@ function getStyleConfig(styleId) {
   return PANORAMA_STYLES[styleId] || PANORAMA_STYLES[DEFAULT_STYLE_ID];
 }
 
-function getAlternateStyleId(styleId) {
-  return styleId === STYLE_FRENCH_LUXURY ? STYLE_MODERN_MINIMALIST : STYLE_FRENCH_LUXURY;
+function getNextStyleId(styleId) {
+  const currentIndex = PANORAMA_STYLE_IDS.indexOf(styleId);
+  if (currentIndex === -1) {
+    return PANORAMA_STYLE_IDS[0];
+  }
+  return PANORAMA_STYLE_IDS[(currentIndex + 1) % PANORAMA_STYLE_IDS.length];
+}
+
+function getOtherStyleIds(styleId) {
+  return PANORAMA_STYLE_IDS.filter((candidateId) => candidateId !== styleId);
 }
 
 function getPanoramaImagePath(styleId, nodeId) {
@@ -270,6 +285,7 @@ function initPanoramaTour() {
   let isSwitching = false;
   let initialized = false;
   let animationFrameId = null;
+  let currentStylePrefetchTicket = 0;
   const textureLoader = new THREE.TextureLoader();
   const textureEntries = new Map();
   const minimapButtons = new Map();
@@ -328,7 +344,7 @@ function initPanoramaTour() {
     styleToggleButton.addEventListener("click", (event) => {
       event.preventDefault();
       event.stopPropagation();
-      switchStyle(getAlternateStyleId(currentStyleId));
+      switchStyle(getNextStyleId(currentStyleId));
       setTooltip(null);
     });
   }
@@ -681,8 +697,7 @@ function initPanoramaTour() {
     }
 
     const keepKeys = new Set([
-      getTextureKey(currentStyleId, currentViewpointId),
-      getTextureKey(getAlternateStyleId(currentStyleId), currentViewpointId)
+      ...PANORAMA_STYLE_IDS.map((styleId) => getTextureKey(styleId, currentViewpointId))
     ]);
     const entries = Array.from(textureEntries.entries()).sort((a, b) => b[1].lastUsed - a[1].lastUsed);
 
@@ -709,10 +724,36 @@ function initPanoramaTour() {
     }, 1200);
   }
 
-  function prefetchAlternateStyleCurrentViewpoint() {
+  function prefetchSiblingStylesForCurrentViewpoint() {
     scheduleIdleTask(() => {
-      loadTextureForNode(getAlternateStyleId(currentStyleId), currentViewpointId).catch(() => {});
+      getOtherStyleIds(currentStyleId).forEach((styleId, styleIndex) => {
+        window.setTimeout(() => {
+          loadTextureForNode(styleId, currentViewpointId).catch(() => {});
+        }, styleIndex * 140);
+      });
     }, 1500);
+  }
+
+  function prefetchCurrentStyleViewpoints() {
+    const styleId = currentStyleId;
+    const viewpointId = currentViewpointId;
+    const ticket = ++currentStylePrefetchTicket;
+
+    scheduleIdleTask(() => {
+      VIEWPOINTS.forEach((node, nodeIndex) => {
+        if (node.id === viewpointId) {
+          return;
+        }
+
+        window.setTimeout(() => {
+          if (ticket !== currentStylePrefetchTicket || currentStyleId !== styleId) {
+            return;
+          }
+
+          loadTextureForNode(styleId, node.id).catch(() => {});
+        }, nodeIndex * 170);
+      });
+    }, 800);
   }
 
   function buildMinimap() {
@@ -904,7 +945,8 @@ function initPanoramaTour() {
         hotspotGroup.visible = true;
         isSwitching = false;
         pruneTextureCache();
-        prefetchAlternateStyleCurrentViewpoint();
+        prefetchSiblingStylesForCurrentViewpoint();
+        prefetchCurrentStyleViewpoints();
       }
     }
 
@@ -1003,7 +1045,8 @@ function initPanoramaTour() {
       setCurrentLabel(currentViewpointId);
       hideLoading();
       prefetchPanoramaImages();
-      prefetchAlternateStyleCurrentViewpoint();
+      prefetchSiblingStylesForCurrentViewpoint();
+      prefetchCurrentStyleViewpoints();
       animate(performance.now());
     } catch (error) {
       console.error(error);

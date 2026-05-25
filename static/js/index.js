@@ -438,6 +438,65 @@ function setupLazyCarouselVideosForCarousel(carousel) {
   });
 }
 
+function setupLazyInlineVideo(video) {
+  if (!video) {
+    return;
+  }
+
+  var shouldAutoplay = video.dataset.autoplayWhenVisible === 'true';
+  var isNearViewport = false;
+
+  function syncInlineVideoPlayback() {
+    if (shouldAutoplay && isNearViewport && !document.hidden) {
+      playCarouselVideo(video);
+    } else {
+      pauseCarouselVideo(video);
+    }
+  }
+
+  video.addEventListener('canplay', function() {
+    syncInlineVideoPlayback();
+  });
+
+  scheduleIdleTask(function() {
+    primeCarouselVideo(video);
+  }, 700);
+
+  if (!('IntersectionObserver' in window)) {
+    isNearViewport = true;
+    syncInlineVideoPlayback();
+    return;
+  }
+
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      isNearViewport = entry.isIntersecting;
+      if (entry.isIntersecting) {
+        primeCarouselVideo(video);
+      }
+      syncInlineVideoPlayback();
+    });
+  }, {
+    rootMargin: '900px 0px',
+    threshold: 0.15
+  });
+
+  observer.observe(video);
+
+  document.addEventListener('visibilitychange', function() {
+    syncInlineVideoPlayback();
+  });
+}
+
+function setupLazyInlineVideos() {
+  var videos = Array.prototype.slice.call(document.querySelectorAll('.lazy-inline-video'));
+  if (!videos.length) {
+    return;
+  }
+
+  videos.forEach(setupLazyInlineVideo);
+}
+
 function setupVideoCarousels() {
   var carousels = Array.prototype.slice.call(document.querySelectorAll('.results-carousel[data-video-carousel="true"]'));
 
@@ -536,6 +595,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   setupResearchDropdown();
+  setupLazyInlineVideos();
   setupVideoCarousels();
   setupQuantitativeChartsRendering();
   setupBibtexCopy();
